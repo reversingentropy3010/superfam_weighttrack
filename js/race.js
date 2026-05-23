@@ -19,7 +19,7 @@ function renderRace(scored) {
       // Sprite sheet: col = body stage (0=fat/1=medium/2=lean), row = animal
       // Col 2 offset adjusted for nose that extends across tile boundary
       var spriteCol = pct < 33 ? 0 : pct < 66 ? 1 : 2;
-      var bpx = spriteCol === 2 ? '-380px' : (-spriteCol * 200) + 'px';
+      var bpx = spriteCol === 2 ? '-400px' : (-spriteCol * 200) + 'px';
       var bpy = (-r.row * 160) + 'px';
 
       var quoteIdx  = pct < 33 ? 0 : pct < 66 ? 1 : pct < 100 ? 2 : 3;
