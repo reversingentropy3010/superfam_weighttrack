@@ -204,7 +204,7 @@
     <details class="scoring-legend">
       <summary>📖 Scoring Rules ▾</summary>
       <div class="legend-grid">
-        <div class="legend-item">🏃 <strong>100 pts total</strong> for reaching goal (Phase 1, scaled per kg relative to your goal)</div>
+        <div class="legend-item">🏃 <strong>1 pt</strong> per 1% of your weight-loss goal completed</div>
         <div class="legend-item">🛡️ <strong>15 pts</strong> per month at/below goal (Phase 2)</div>
         <div class="legend-item">⬇️ <strong>+2 pts</strong> per kg under goal, max +10</div>
         <div class="legend-item">🎯 <strong>50–100 pts</strong> one-time goal-hit bonus (more if early)</div>
@@ -807,17 +807,27 @@ function dcLoadTestData() {
     '2026-05-01','2026-06-01','2026-07-01','2026-08-01',
     '2026-09-01','2026-10-01','2026-11-01','2026-12-01'
   ];
+  // Realistic data: similar absolute pace (~1–1.5 kg/month), each has at least one slip
+  // SC: goal 75 (–15 kg). Steady with Sep slip. 9 kg total, still racing.
+  // JC: goal 80 (–15 kg). Two slips (Jul, Oct). 6 kg total, still racing.
+  // CHC: goal 85 (–10 kg). Sep slip, then strong finish. Hits goal Dec → Phase 2.
   var testWeights = {
-    'SC':  [90, 88, 86, 84, 82, 80, 77, 75],
-    'JC':  [95, 94, 93, 92, 91, 90, 89, 88],
-    'CHC': [95, 93, 91, 89, 87, 86, 85, 84],
+    'SC':  [90, 88, 87, 85, 86, 84, 83, 81],
+    'JC':  [95, 93, 95, 93, 91, 93, 91, 89],
+    'CHC': [95, 94, 93, 91, 92, 90, 88, 85],
   };
   _data.participants.forEach(function(p) {
     var ws = testWeights[p.id];
     if (ws) p.entries = months.map(function(d, i) { return { date: d, weight: ws[i] }; });
   });
   rerender();
-  dcLog('✓ Loaded 8-month test data.\nSC → hits goal (75 kg) Dec 2026\nCHC → hits goal (85 kg) Nov 2026, then 84 kg (Phase 2)\nJC → steady 1 kg/month, still racing');
+  dcLog(
+    '✓ Loaded 8-month test data.\n' +
+    'SC  → –9 kg, 1 slip (Sep), still racing (goal 75)\n' +
+    'JC  → –6 kg, 2 slips (Jul, Oct), still racing (goal 80)\n' +
+    'CHC → –10 kg, 1 slip (Sep), hits goal (85) Dec → Phase 2\n\n' +
+    'Gain months = 0 pts + streak reset'
+  );
 }
 
 function initDevConsole(participants) {
