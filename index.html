@@ -111,6 +111,11 @@
     .legend-item { color: var(--text-muted); }
     .legend-item strong { color: var(--text); }
 
+    .chart-tabs { display: flex; gap: .5rem; margin-bottom: .75rem; flex-wrap: wrap; }
+    .chart-tab { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: .38rem .9rem; border-radius: 7px; font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .chart-tab:hover { border-color: #6366f1; color: var(--text); }
+    .chart-tab.active { background: #6366f133; border-color: #6366f1; color: #a5b4fc; }
+
     .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; }
     canvas { max-height: 340px; }
 
@@ -156,16 +161,16 @@
 
 <header>
   <h1>⚖️ SuperFam Weight <span>Challenge</span></h1>
-  <p>Monthly weigh-ins · Deadline <strong>November 1, 2027</strong></p>
+  <p id="weighin-label">⏱️ Next weigh-in loading… · Deadline <strong>November 1, 2027</strong></p>
   <div class="phase-legend">
     <span class="phase-pill p1">🏃 Phase 1: The Race — Reach your goal weight</span>
     <span class="phase-pill p2">🛡️ Phase 2: The Hold — Maintain at goal</span>
   </div>
   <div id="countdown">
-    <div class="cd-box"><div class="num" id="cd-months">–</div><div class="lbl">Months</div></div>
     <div class="cd-box"><div class="num" id="cd-days">–</div><div class="lbl">Days</div></div>
     <div class="cd-box"><div class="num" id="cd-hrs">–</div><div class="lbl">Hours</div></div>
     <div class="cd-box"><div class="num" id="cd-min">–</div><div class="lbl">Mins</div></div>
+    <div class="cd-box"><div class="num" id="cd-sec">–</div><div class="lbl">Secs</div></div>
   </div>
 </header>
 
@@ -199,14 +204,14 @@
     <details class="scoring-legend">
       <summary>📖 Scoring Rules ▾</summary>
       <div class="legend-grid">
-        <div class="legend-item">🏃 <strong>10 pts</strong> per kg lost (Phase 1)</div>
-        <div class="legend-item">🛡️ <strong>50 pts</strong> per month at/below goal (Phase 2)</div>
-        <div class="legend-item">⬇️ <strong>+5 pts</strong> per kg under goal, max +25</div>
-        <div class="legend-item">🎯 <strong>75–150 pts</strong> one-time goal-hit bonus (more if early)</div>
-        <div class="legend-item">🔥 <strong>+20 pts</strong> at 3-month consecutive streak</div>
-        <div class="legend-item">🔥 <strong>+40 pts</strong> at 6-month consecutive streak</div>
-        <div class="legend-item">🔥 <strong>+80 pts</strong> at 12-month consecutive streak</div>
-        <div class="legend-item">🏆 <strong>+25 pts</strong> for winning a given month</div>
+        <div class="legend-item">🏃 <strong>100 pts total</strong> for reaching goal (Phase 1, scaled per kg relative to your goal)</div>
+        <div class="legend-item">🛡️ <strong>15 pts</strong> per month at/below goal (Phase 2)</div>
+        <div class="legend-item">⬇️ <strong>+2 pts</strong> per kg under goal, max +10</div>
+        <div class="legend-item">🎯 <strong>50–100 pts</strong> one-time goal-hit bonus (more if early)</div>
+        <div class="legend-item">🔥 <strong>+10 pts</strong> at 3-month consecutive streak</div>
+        <div class="legend-item">🔥 <strong>+20 pts</strong> at 6-month consecutive streak</div>
+        <div class="legend-item">🔥 <strong>+50 pts</strong> at 12-month consecutive streak</div>
+        <div class="legend-item">🏆 <strong>+10 pts</strong> for winning a given month</div>
       </div>
     </details>
     <div id="score-bd-container"></div>
@@ -214,6 +219,11 @@
 
   <section>
     <h2>📈 Weight Over Time</h2>
+    <div class="chart-tabs">
+      <button class="chart-tab active" data-mode="weight" onclick="switchChart('weight')">⚖️ Weight</button>
+      <button class="chart-tab" data-mode="pct" onclick="switchChart('pct')">📊 % Complete</button>
+      <button class="chart-tab" data-mode="points" onclick="switchChart('points')">🏅 Points</button>
+    </div>
     <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
   </section>
 
@@ -251,6 +261,7 @@
     <button class="dev-btn dev-btn-secondary" onclick="dcExport()">📥 Export data.json</button>
     <hr class="dev-divider" />
     <button class="dev-btn dev-btn-danger" onclick="dcReset()">↩ Reset to Original Data</button>
+    <button class="dev-btn dev-btn-secondary" onclick="dcLoadTestData()">🧪 Load 8-Month Test Data</button>
     <hr class="dev-divider" />
     <div class="dev-field">
       <label>Console</label>
@@ -264,19 +275,20 @@
 
 // ── Scoring constants ───────────────────────────────────────────────
 var SC = {
-  LOSS_PER_KG:        10,
-  MAINTAIN_BASE:      50,
-  UNDER_PER_KG:        5,
-  UNDER_CAP:          25,
-  GOAL_BASE:          75,
-  GOAL_EARLY_MAX:     75,
-  STREAK_MILESTONES: [[3, 20], [6, 40], [12, 80]],
-  MONTHLY_WIN:        25,
+  LOSS_PCT_PTS:       100,  // total pts for 100% of Phase 1 complete (scaled per kg relative to each person's total)
+  MAINTAIN_BASE:       15,  // pts per month at/below goal (Phase 2)
+  UNDER_PER_KG:         2,  // bonus pts per kg below goal
+  UNDER_CAP:           10,  // max under-goal bonus
+  GOAL_BASE:           50,  // one-time goal-hit base bonus
+  GOAL_EARLY_MAX:      50,  // extra pts for hitting goal early
+  STREAK_MILESTONES: [[3, 10], [6, 20], [12, 50]],
+  MONTHLY_WIN:         10,  // pts for winning a given month
 };
 
-var _original = null;
-var _data     = null;
-var _chart    = null;
+var _original  = null;
+var _data      = null;
+var _chart     = null;
+var _chartMode = 'weight';  // 'weight' | 'pct' | 'points'
 
 // ── Utilities ────────────────────────────────────────────────────────
 function fmt(v, d) { return Number(v).toFixed(d !== undefined ? d : 1); }
@@ -338,6 +350,7 @@ function computeScores(data) {
     var streak        = 0;
     var phase         = 1;
     var goalAchievedDate = null;
+    var totalToLose   = Math.max(0.1, p.startWeight - p.goalWeight);
 
     for (var i = 1; i < entries.length; i++) {
       var prev   = entries[i - 1];
@@ -346,10 +359,11 @@ function computeScores(data) {
 
       if (phase === 1) {
         if (kgLost > 0) {
-          var pts = Math.round(kgLost * SC.LOSS_PER_KG * 10) / 10;
+          var pts = Math.round((kgLost / totalToLose) * SC.LOSS_PCT_PTS * 10) / 10;
           total  += pts;
           streak++;
-          events.push({ date: curr.date, type: 'loss', pts: pts, note: 'Lost ' + fmt(kgLost) + ' kg' });
+          var pctProgress = fmt((kgLost / totalToLose) * 100);
+          events.push({ date: curr.date, type: 'loss', pts: pts, note: 'Lost ' + fmt(kgLost) + ' kg (' + pctProgress + '% of goal)' });
           monthlyPerf[curr.date] = pts;
           SC.STREAK_MILESTONES.forEach(function(m) {
             if (streak === m[0]) {
@@ -429,25 +443,42 @@ function computeScores(data) {
     p.sd.events.sort(function(a, b) { return a.date.localeCompare(b.date); });
   });
 
+  // Compute cumulative score by date for points chart
+  var allDts = allDates(participants);
+  scored.forEach(function(p) {
+    var cum = 0;
+    p.sd.scoreByDate = {};
+    allDts.forEach(function(d) {
+      p.sd.events.forEach(function(ev) { if (ev.date === d) cum += ev.pts; });
+      p.sd.scoreByDate[d] = cum;
+    });
+  });
+
   return { scored: scored, monthlyWinners: monthlyWinners };
 }
 
-// ── Countdown ────────────────────────────────────────────────────────
-function startCountdown(deadline) {
+// ── Countdown (to next 1st-of-month weigh-in) ────────────────────────
+function startWeighInCountdown() {
+  function nextFirst() {
+    var n = new Date();
+    return new Date(n.getFullYear(), n.getMonth() + 1, 1);
+  }
   function tick() {
-    var diff = new Date(deadline) - new Date();
-    if (diff <= 0) {
-      ['cd-months','cd-days','cd-hrs','cd-min'].forEach(function(id) { document.getElementById(id).textContent = '0'; });
-      return;
-    }
-    var totalDays = Math.floor(diff / 864e5);
-    document.getElementById('cd-months').textContent = Math.floor(totalDays / 30.44);
-    document.getElementById('cd-days').textContent   = Math.floor(totalDays % 30.44);
-    document.getElementById('cd-hrs').textContent    = Math.floor((diff % 864e5) / 36e5);
-    document.getElementById('cd-min').textContent    = Math.floor((diff % 36e5) / 6e4);
+    var target = nextFirst();
+    var diff   = target - new Date();
+    if (diff <= 0) diff = 0;
+    document.getElementById('cd-days').textContent = Math.floor(diff / 864e5);
+    document.getElementById('cd-hrs').textContent  = Math.floor((diff % 864e5) / 36e5);
+    document.getElementById('cd-min').textContent  = Math.floor((diff % 36e5) / 6e4);
+    document.getElementById('cd-sec').textContent  = Math.floor((diff % 6e4) / 1e3);
+    // Update label
+    var lbl = document.getElementById('weighin-label');
+    if (lbl) lbl.innerHTML = '⏱️ Next weigh-in: <strong>'
+      + target.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      + '</strong> · Deadline <strong>November 1, 2027</strong>';
   }
   tick();
-  setInterval(tick, 60000);
+  setInterval(tick, 1000);
 }
 
 // ── Render: Leaderboard ──────────────────────────────────────────────
@@ -485,7 +516,9 @@ function renderPhaseCards(scored) {
     var change = (cur && prev) ? prev.weight - cur.weight : null;
     var chStr  = change === null ? '—' : change > 0 ? '▼ ' + fmt(change) + ' kg' : change < 0 ? '▲ ' + fmt(Math.abs(change)) + ' kg' : '—';
     var chCls  = change > 0 ? 'pos' : change < 0 ? 'neg' : '';
-    var streakBadge = p.sd.streak >= 2 ? '<div class="streak-badge">🔥 ' + p.sd.streak + '-month streak</div>' : '';
+    var streakIcon  = p.sd.phase === 2 ? '🛡️' : '🔥';
+    var streakLabel = p.sd.phase === 2 ? '-month hold' : '-month';
+    var streakBadge = p.sd.streak >= 2 ? '<div class="streak-badge">' + streakIcon + ' ' + p.sd.streak + streakLabel + ' streak</div>' : '';
 
     if (p.sd.phase === 1) {
       var rem = curW - p.goalWeight;
@@ -568,7 +601,7 @@ function renderScoreBreakdown(scored) {
 }
 
 // ── Render: Chart ────────────────────────────────────────────────────
-function renderChart(participants, dates) {
+function renderChart(participants, dates, scored) {
   if (_chart) { _chart.destroy(); _chart = null; }
   var ctx    = document.getElementById('weightChart').getContext('2d');
   var labels = dates.map(function(d) {
@@ -576,21 +609,69 @@ function renderChart(participants, dates) {
   });
 
   var datasets = [];
-  participants.forEach(function(p) {
-    datasets.push({
-      label: p.name,
-      data: dates.map(function(d) { return weightOn(p, d); }),
-      borderColor: p.color, backgroundColor: p.color + '22',
-      borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
-      tension: 0.3, fill: false, spanGaps: true,
+  var yOptions = {};
+  var legendFilter;
+
+  if (_chartMode === 'weight') {
+    participants.forEach(function(p) {
+      datasets.push({
+        label: p.name,
+        data: dates.map(function(d) { return weightOn(p, d); }),
+        borderColor: p.color, backgroundColor: p.color + '22',
+        borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
+        tension: 0.3, fill: false, spanGaps: true,
+      });
+      datasets.push({
+        label: p.name + ' goal',
+        data: dates.map(function() { return p.goalWeight; }),
+        borderColor: p.color, borderDash: [5, 5],
+        borderWidth: 1.5, pointRadius: 0, fill: false, spanGaps: true,
+      });
+    });
+    yOptions = { ticks: { color: '#7b7b9a', callback: function(v) { return v + ' kg'; } }, grid: { color: '#1e1e2e' } };
+    legendFilter = function(item) { return !item.text.includes(' goal'); };
+
+  } else if (_chartMode === 'pct') {
+    participants.forEach(function(p) {
+      datasets.push({
+        label: p.name,
+        data: dates.map(function(d) {
+          var w = weightOn(p, d);
+          return w !== null ? Math.round(progressPct(p.startWeight, p.goalWeight, w) * 10) / 10 : null;
+        }),
+        borderColor: p.color, backgroundColor: p.color + '22',
+        borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
+        tension: 0.3, fill: false, spanGaps: true,
+      });
     });
     datasets.push({
-      label: p.name + ' goal',
-      data: dates.map(function() { return p.goalWeight; }),
-      borderColor: p.color, borderDash: [5, 5],
+      label: '100% Goal',
+      data: dates.map(function() { return 100; }),
+      borderColor: '#34d399', borderDash: [6, 4],
       borderWidth: 1.5, pointRadius: 0, fill: false, spanGaps: true,
     });
-  });
+    yOptions = { min: 0, max: 110, ticks: { color: '#7b7b9a', callback: function(v) { return v + '%'; } }, grid: { color: '#1e1e2e' } };
+    legendFilter = function(item) { return item.text !== '100% Goal'; };
+
+  } else {
+    // Points chart – cumulative
+    var scoredMap = {};
+    if (scored) scored.forEach(function(p) { scoredMap[p.id] = p; });
+    participants.forEach(function(p) {
+      var sp = scoredMap[p.id];
+      datasets.push({
+        label: p.name,
+        data: dates.map(function(d) {
+          return (sp && sp.sd.scoreByDate && sp.sd.scoreByDate[d] !== undefined) ? sp.sd.scoreByDate[d] : null;
+        }),
+        borderColor: p.color, backgroundColor: p.color + '18',
+        borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
+        tension: 0.3, fill: true, spanGaps: true,
+      });
+    });
+    yOptions = { min: 0, ticks: { color: '#7b7b9a', callback: function(v) { return v + ' pts'; } }, grid: { color: '#1e1e2e' } };
+    legendFilter = function() { return true; };
+  }
 
   _chart = new Chart(ctx, {
     type: 'line',
@@ -599,15 +680,25 @@ function renderChart(participants, dates) {
       responsive: true,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { labels: { color: '#7b7b9a', filter: function(item) { return !item.text.includes(' goal'); }, usePointStyle: true } },
+        legend: { labels: { color: '#7b7b9a', filter: legendFilter, usePointStyle: true } },
         tooltip: { backgroundColor: '#1a1a24', borderColor: '#2e2e40', borderWidth: 1, titleColor: '#e2e2f0', bodyColor: '#7b7b9a' },
       },
       scales: {
         x: { ticks: { color: '#7b7b9a' }, grid: { color: '#1e1e2e' } },
-        y: { ticks: { color: '#7b7b9a', callback: function(v) { return v + ' kg'; } }, grid: { color: '#1e1e2e' } },
+        y: yOptions,
       },
     },
   });
+}
+
+function switchChart(mode) {
+  _chartMode = mode;
+  document.querySelectorAll('.chart-tab').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  var dates = allDates(_data.participants);
+  var result = computeScores(_data);
+  if (dates.length > 0) renderChart(_data.participants, dates, result.scored);
 }
 
 // ── Render: History ──────────────────────────────────────────────────
@@ -657,7 +748,7 @@ function rerender() {
   renderLeaderboard(result.scored);
   renderPhaseCards(result.scored);
   renderScoreBreakdown(result.scored);
-  if (dates.length > 0) renderChart(_data.participants, dates);
+  if (dates.length > 0) renderChart(_data.participants, dates, result.scored);
   renderHistory(_data.participants, dates, result.monthlyWinners);
   setLastUpdated(_data.participants);
 }
@@ -710,6 +801,25 @@ function dcReset() {
   dcLog('✓ Reset to original data.');
 }
 
+function dcLoadTestData() {
+  _data = JSON.parse(JSON.stringify(_original));
+  var months = [
+    '2026-05-01','2026-06-01','2026-07-01','2026-08-01',
+    '2026-09-01','2026-10-01','2026-11-01','2026-12-01'
+  ];
+  var testWeights = {
+    'SC':  [90, 88, 86, 84, 82, 80, 77, 75],
+    'JC':  [95, 94, 93, 92, 91, 90, 89, 88],
+    'CHC': [95, 93, 91, 89, 87, 86, 85, 84],
+  };
+  _data.participants.forEach(function(p) {
+    var ws = testWeights[p.id];
+    if (ws) p.entries = months.map(function(d, i) { return { date: d, weight: ws[i] }; });
+  });
+  rerender();
+  dcLog('✓ Loaded 8-month test data.\nSC → hits goal (75 kg) Dec 2026\nCHC → hits goal (85 kg) Nov 2026, then 84 kg (Phase 2)\nJC → steady 1 kg/month, still racing');
+}
+
 function initDevConsole(participants) {
   document.getElementById('dc-participant').innerHTML =
     participants.map(function(p) { return '<option value="' + p.id + '">' + p.name + '</option>'; }).join('');
@@ -725,7 +835,7 @@ function initDevConsole(participants) {
     .then(function(data) {
       _original = data;
       _data     = JSON.parse(JSON.stringify(data));
-      startCountdown(_data.deadline);
+      startWeighInCountdown();
       initDevConsole(_data.participants);
       rerender();
     });
