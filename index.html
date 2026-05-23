@@ -165,7 +165,7 @@
     .race-lane-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
     .race-animal-name { font-size: 1.05rem; font-weight: 800; }
     .race-lane-stats  { font-size: .78rem; color: var(--text-muted); text-align: right; line-height: 1.55; }
-    .race-track-outer { position: relative; height: 80px; background: #060610; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+    .race-track-outer { position: relative; height: 90px; background: #060610; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
     .race-track-progress { height: 100%; transition: width 1.2s cubic-bezier(.34,1.56,.64,1); }
     .race-track-grid { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), #ffffff07 calc(10% - 1px), #ffffff07 10%); pointer-events: none; }
     .racer-pos  { position: absolute; top: 0; bottom: 0; display: flex; align-items: flex-end; padding-bottom: 3px; transition: left 1.2s cubic-bezier(.34,1.56,.64,1); }
@@ -173,7 +173,7 @@
     .racer-anim.hold { animation: raceHold 2s ease-in-out infinite alternate; }
     @keyframes raceRun  { from { transform: translateY(0);    } to { transform: translateY(-9px); } }
     @keyframes raceHold { from { transform: translateY(-5px); } to { transform: translateY(5px);  } }
-    .racer-char { display: inline-block; font-size: 2.6rem; line-height: 1; transform-origin: bottom center; transition: transform 1.5s ease; }
+    .racer-sprite { width: 88px; height: 70px; background-image: url('animals.png'); background-size: 300% 300%; background-repeat: no-repeat; image-rendering: crisp-edges; flex-shrink: 0; }
     .race-finish-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 2rem; pointer-events: none; }
     .race-lane-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: .7rem; font-size: .78rem; flex-wrap: wrap; gap: .3rem; }
     .race-pct-label  { font-weight: 800; }
@@ -757,10 +757,11 @@ function switchChart(mode) {
 }
 
 // ── Race view ────────────────────────────────────────────
+// Sprite sheet: 3 cols (fat/medium/lean) × 3 rows (chicken/horse/dragon)
 var RACERS = {
-  SC:  { emoji: '🐔', nickname: 'Clucky'         },
-  JC:  { emoji: '🐴', nickname: 'Thunderhooves' },
-  CHC: { emoji: '🐉', nickname: 'Blaze'          },
+  SC:  { row: 0, nickname: 'Clucky'         },
+  JC:  { row: 1, nickname: 'Thunderhooves'  },
+  CHC: { row: 2, nickname: 'Blaze'          },
 };
 
 function renderRace(scored) {
@@ -774,21 +775,20 @@ function renderRace(scored) {
       var curW = cur ? cur.weight : p.startWeight;
       var pct  = progressPct(p.startWeight, p.goalWeight, curW);
       var isP2 = p.sd.phase === 2;
-      var r    = RACERS[p.id] || { emoji: '🏃', nickname: p.name };
+      var r    = RACERS[p.id] || { row: 0, nickname: p.name };
 
-      // Body shape: wide+short (fat) → normal+tall (lean) as pct increases
-      var frac = Math.min(1, pct / 100);
-      var sx   = (1.65 - frac * 0.65).toFixed(2);  // 1.65 → 1.00
-      var sy   = (0.78 + frac * 0.35).toFixed(2);  // 0.78 → 1.13
+      // Sprite sheet: col = body stage, row = animal
+      // Col 0 = super fat (0–33%), Col 1 = medium (33–66%), Col 2 = lean (66–100%)
+      var spriteCol = pct < 33 ? 0 : pct < 66 ? 1 : 2;
+      var bpx = (spriteCol / 2 * 100) + '%';  // 0%, 50%, 100%
+      var bpy = (r.row    / 2 * 100) + '%';   // 0%, 50%, 100%
 
       // Track position: cap before finish flag
       var trackPos = isP2 ? 86 : Math.min(79, pct * 0.79);
 
-      var bodyStage = pct < 20  ? 'Looking a little chunky...'
-                    : pct < 40  ? 'Getting those legs moving!'
-                    : pct < 60  ? 'Noticeably trimmer!'
-                    : pct < 80  ? 'Looking lean!'
-                    : pct < 100 ? 'Nearly there!'
+      var bodyStage = pct < 33  ? 'Looking a little chunky...'
+                    : pct < 66  ? 'Getting there!'
+                    : pct < 100 ? 'Looking lean!'
                     :             'Goal achieved! 🛡️';
 
       var kgLost = (p.startWeight - curW);
@@ -796,10 +796,10 @@ function renderRace(scored) {
       return '<div class="race-lane" style="--lane-color:' + p.color + '">'  
         + '<div class="race-lane-top">'  
         +   '<div class="race-animal-name" style="color:' + p.color + '">'  
-        +     r.emoji + ' ' + p.name  
+        +     p.name  
         +     ' <span style="font-weight:400;font-size:.78rem;color:var(--text-muted)">&ldquo;' + r.nickname + '&rdquo;</span>'  
         +   '</div>'  
-        +   '<div class="race-lane-stats">'
+        +   '<div class="race-lane-stats">'  
         +     (isP2
               ? '🛡️ Holding &middot; <strong style="color:#6ee7b7">' + p.sd.streak + '-month streak</strong>'
               : '<strong style="color:' + p.color + '">' + fmt(pct, 0) + '%</strong>'
@@ -809,9 +809,9 @@ function renderRace(scored) {
         + '<div class="race-track-outer">'  
         +   '<div class="race-track-progress" style="width:' + pct + '%;background:' + p.color + '25"></div>'  
         +   '<div class="race-track-grid"></div>'  
-        +   '<div class="racer-pos" style="left:calc(' + trackPos + '% - 22px)">'  
+        +   '<div class="racer-pos" style="left:calc(' + trackPos + '% - 44px)">'  
         +     '<div class="racer-anim' + (isP2 ? ' hold' : '') + '">'  
-        +       '<span class="racer-char" style="transform:scaleX(' + sx + ') scaleY(' + sy + ')">' + r.emoji + '</span>'  
+        +       '<div class="racer-sprite" style="background-position:' + bpx + ' ' + bpy + '"></div>'  
         +     '</div>'  
         +   '</div>'  
         +   '<div class="race-finish-icon">' + (isP2 ? '✅' : '🏁') + '</div>'  
