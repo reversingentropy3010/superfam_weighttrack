@@ -205,13 +205,14 @@
       <summary>📖 Scoring Rules ▾</summary>
       <div class="legend-grid">
         <div class="legend-item">🏃 <strong>1 pt</strong> per 1% of your weight-loss goal completed</div>
-        <div class="legend-item">🛡️ <strong>15 pts</strong> per month at/below goal (Phase 2)</div>
-        <div class="legend-item">⬇️ <strong>+2 pts</strong> per kg under goal, max +10</div>
+        <div class="legend-item">🛡️ <strong>30 pts</strong> per month at/below goal (Phase 2)</div>
+        <div class="legend-item">📏 <strong>+8 pts</strong> hold within ±0.5 kg of last month</div>
+        <div class="legend-item">📏 <strong>+4 pts</strong> hold within ±1.0 kg of last month</div>
         <div class="legend-item">🎯 <strong>50–100 pts</strong> one-time goal-hit bonus (more if early)</div>
         <div class="legend-item">🔥 <strong>+10 pts</strong> at 3-month consecutive streak</div>
-        <div class="legend-item">🔥 <strong>+20 pts</strong> at 6-month consecutive streak</div>
-        <div class="legend-item">🔥 <strong>+50 pts</strong> at 12-month consecutive streak</div>
-        <div class="legend-item">🏆 <strong>+10 pts</strong> for winning a given month</div>
+        <div class="legend-item">🔥 <strong>+20 pts</strong> at 6-month streak</div>
+        <div class="legend-item">🔥 <strong>+50 pts</strong> at 12-month streak</div>
+        <div class="legend-item">🥇 <strong>+20</strong> / 🥈 <strong>+10</strong> / 🥉 <strong>+5</strong> monthly rankings</div>
       </div>
     </details>
     <div id="score-bd-container"></div>
@@ -275,14 +276,16 @@
 
 // ── Scoring constants ───────────────────────────────────────────────
 var SC = {
-  LOSS_PCT_PTS:       100,  // total pts for 100% of Phase 1 complete (scaled per kg relative to each person's total)
-  MAINTAIN_BASE:       15,  // pts per month at/below goal (Phase 2)
-  UNDER_PER_KG:         2,  // bonus pts per kg below goal
-  UNDER_CAP:           10,  // max under-goal bonus
-  GOAL_BASE:           50,  // one-time goal-hit base bonus
-  GOAL_EARLY_MAX:      50,  // extra pts for hitting goal early
+  LOSS_PCT_PTS:        100,   // 1 pt per 1% of Phase 1 goal completed
+  MAINTAIN_BASE:        30,   // pts per month at/below goal (Phase 2)
+  STABILITY_TIGHT:     0.5,   // kg: within this = tight hold
+  STABILITY_TIGHT_PTS:   8,   // bonus pts for tight month-to-month hold
+  STABILITY_OK:        1.0,   // kg: within this = stable
+  STABILITY_OK_PTS:      4,   // bonus pts for stable month-to-month hold
+  GOAL_BASE:            50,   // one-time goal-hit base bonus
+  GOAL_EARLY_MAX:       50,   // extra pts for hitting goal early
   STREAK_MILESTONES: [[3, 10], [6, 20], [12, 50]],
-  MONTHLY_WIN:         10,  // pts for winning a given month
+  MONTHLY_RANKS: [20, 10, 5], // pts for 1st / 2nd / 3rd place each month
 };
 
 var _original  = null;
@@ -394,18 +397,23 @@ function computeScores(data) {
 
       } else {
         if (curr.weight <= p.goalWeight) {
-          var kgUnder    = p.goalWeight - curr.weight;
-          var underBonus = Math.min(SC.UNDER_CAP, Math.round(kgUnder * SC.UNDER_PER_KG * 10) / 10);
-          var mpts       = SC.MAINTAIN_BASE + underBonus;
+          var changeAbs      = Math.abs(curr.weight - prev.weight);
+          var stabilityBonus = changeAbs <= SC.STABILITY_TIGHT ? SC.STABILITY_TIGHT_PTS
+                             : changeAbs <= SC.STABILITY_OK    ? SC.STABILITY_OK_PTS : 0;
+          var mpts = SC.MAINTAIN_BASE + stabilityBonus;
           total  += mpts;
           streak++;
-          var underNote = kgUnder > 0 ? ' (' + fmt(kgUnder) + ' kg under goal)' : ' (exactly at goal)';
-          events.push({ date: curr.date, type: 'maintain', pts: mpts, note: 'Maintained' + underNote });
+          var stabNote = stabilityBonus === SC.STABILITY_TIGHT_PTS
+            ? ' 📏 tight hold (±' + fmt(changeAbs) + ' kg, +' + SC.STABILITY_TIGHT_PTS + ' pts)'
+            : stabilityBonus === SC.STABILITY_OK_PTS
+            ? ' 📏 stable (±' + fmt(changeAbs) + ' kg, +' + SC.STABILITY_OK_PTS + ' pts)'
+            : ' (±' + fmt(changeAbs) + ' kg, no stability bonus)';
+          events.push({ date: curr.date, type: 'maintain', pts: mpts, note: 'Maintained' + stabNote });
           monthlyPerf[curr.date] = mpts;
           SC.STREAK_MILESTONES.forEach(function(m) {
             if (streak === m[0]) {
               total += m[1];
-              events.push({ date: curr.date, type: 'streak', pts: m[1], note: m[0] + '-month streak 🔥' });
+              events.push({ date: curr.date, type: 'streak', pts: m[1], note: m[0] + '-month hold streak 🛡️' });
             }
           });
         } else {
@@ -420,22 +428,34 @@ function computeScores(data) {
     return Object.assign({}, p, { sd: { total: total, events: events, monthlyPerf: monthlyPerf, phase: phase, streak: streak, goalAchievedDate: goalAchievedDate } });
   });
 
-  // Monthly winners
+  // Monthly rankings (tiered: 1st / 2nd / 3rd)
   var monthlyWinners = {};
   for (var di = 1; di < dates.length; di++) {
     var date    = dates[di];
-    var bestPts = 0;
-    scored.forEach(function(p) {
-      if (p.sd.monthlyPerf[date] !== undefined && p.sd.monthlyPerf[date] > bestPts) {
-        bestPts = p.sd.monthlyPerf[date];
+    var monthly = scored
+      .filter(function(p) { return p.sd.monthlyPerf[date] > 0; })
+      .slice()
+      .sort(function(a, b) { return b.sd.monthlyPerf[date] - a.sd.monthlyPerf[date]; });
+    if (!monthly.length) continue;
+
+    // History table shows 1st-place finisher(s)
+    var topPts = monthly[0].sd.monthlyPerf[date];
+    monthlyWinners[date] = monthly
+      .filter(function(p) { return p.sd.monthlyPerf[date] === topPts; })
+      .map(function(p) { return p.id; });
+
+    var rankLabels = ['🥇 1st', '🥈 2nd', '🥉 3rd'];
+    var currentRank = 0;
+    monthly.forEach(function(p, idx) {
+      // Advance rank on a new (lower) score tier (standard competition ranking)
+      if (idx > 0 && p.sd.monthlyPerf[date] < monthly[idx - 1].sd.monthlyPerf[date]) {
+        currentRank = idx;
       }
-    });
-    if (bestPts <= 0) continue;
-    var winners = scored.filter(function(p) { return p.sd.monthlyPerf[date] === bestPts; });
-    monthlyWinners[date] = winners.map(function(p) { return p.id; });
-    winners.forEach(function(p) {
-      p.sd.total += SC.MONTHLY_WIN;
-      p.sd.events.push({ date: date, type: 'win', pts: SC.MONTHLY_WIN, note: 'Monthly winner 🏆' });
+      var rankPts = currentRank < SC.MONTHLY_RANKS.length ? SC.MONTHLY_RANKS[currentRank] : 0;
+      if (rankPts > 0) {
+        p.sd.total += rankPts;
+        p.sd.events.push({ date: date, type: 'win', pts: rankPts, note: 'Monthly ' + rankLabels[currentRank] + ' (+' + rankPts + ' pts)' });
+      }
     });
   }
 
@@ -812,9 +832,9 @@ function dcLoadTestData() {
   // JC: goal 80 (–15 kg). Two slips (Jul, Oct). 6 kg total, still racing.
   // CHC: goal 85 (–10 kg). Sep slip, then strong finish. Hits goal Dec → Phase 2.
   var testWeights = {
-    'SC':  [90, 88, 87, 85, 86, 84, 83, 81],
-    'JC':  [95, 93, 95, 93, 91, 93, 91, 89],
-    'CHC': [95, 94, 93, 91, 92, 90, 88, 85],
+    'SC':  [90, 88, 87, 85, 86, 84, 83, 81, 77, 75, 74, 74, 73],
+    'JC':  [95, 93, 95, 93, 91, 93, 91, 89, 86, 80, 80, 79, 78],
+    'CHC': [95, 94, 93, 91, 92, 90, 91, 88, 86, 85, 85, 84, 84],
   };
   _data.participants.forEach(function(p) {
     var ws = testWeights[p.id];
