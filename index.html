@@ -470,7 +470,8 @@ function computeScores(data) {
       })
       .slice()
       .sort(function(a, b) { return b.sd.monthlyPerf[date] - a.sd.monthlyPerf[date]; });
-    if (!monthly.length) continue;
+    // Need at least 2 Phase 1 racers for medals to mean anything
+    if (monthly.length < 2) continue;
 
     // History table shows 1st-place finisher(s)
     var topPts = monthly[0].sd.monthlyPerf[date];
@@ -798,11 +799,11 @@ function renderRace(scored) {
         +     r.emoji + ' ' + p.name  
         +     ' <span style="font-weight:400;font-size:.78rem;color:var(--text-muted)">&ldquo;' + r.nickname + '&rdquo;</span>'  
         +   '</div>'  
-        +   '<div class="race-lane-stats">'  
-        +     (isP2  
-        +       ? '🛡️ Holding &middot; <strong style="color:#6ee7b7">' + p.sd.streak + '-month streak</strong>'  
-        +       : '<strong style="color:' + p.color + '">' + fmt(pct, 0) + '%</strong>'  
-        +         ' &middot; ' + fmt(kgLost, 1) + ' kg lost')  
+        +   '<div class="race-lane-stats">'
+        +     (isP2
+              ? '🛡️ Holding &middot; <strong style="color:#6ee7b7">' + p.sd.streak + '-month streak</strong>'
+              : '<strong style="color:' + p.color + '">' + fmt(pct, 0) + '%</strong>'
+                + ' &middot; ' + fmt(kgLost, 1) + ' kg lost')
         +   '</div>'  
         + '</div>'  
         + '<div class="race-track-outer">'  
