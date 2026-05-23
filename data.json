@@ -1,0 +1,35 @@
+{
+  "deadline": "2027-11-01",
+  "participants": [
+    {
+      "id": "CC",
+      "name": "CC",
+      "startWeight": 90,
+      "goalWeight": 75,
+      "color": "#6366f1",
+      "entries": [
+        { "date": "2026-05-01", "weight": 90 }
+      ]
+    },
+    {
+      "id": "JC",
+      "name": "JC",
+      "startWeight": 95,
+      "goalWeight": 80,
+      "color": "#ec4899",
+      "entries": [
+        { "date": "2026-05-01", "weight": 95 }
+      ]
+    },
+    {
+      "id": "CHC",
+      "name": "CHC",
+      "startWeight": 95,
+      "goalWeight": 85,
+      "color": "#10b981",
+      "entries": [
+        { "date": "2026-05-01", "weight": 95 }
+      ]
+    }
+  ]
+}
