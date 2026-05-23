@@ -19,7 +19,10 @@ function renderRace(scored) {
       // Sprite sheet: col = body stage (0=fat/1=medium/2=lean), row = animal
       // Col 2 offset adjusted for nose that extends across tile boundary
       var spriteCol = pct < 33 ? 0 : pct < 66 ? 1 : 2;
-      var bpx = spriteCol === 2 ? '-400px' : (-spriteCol * 200) + 'px';
+      // animals.png is 1528px wide; at background-size:300% it renders at 600px.
+      // Column starts in rendered px: col0=0, col1=196 (500*600/1528), col2=393 (1000*600/1528)
+      var COL_PX = ['0px', '-196px', '-393px'];
+      var bpx = COL_PX[spriteCol];
       var bpy = (-r.row * 160) + 'px';
 
       var quoteIdx  = pct < 33 ? 0 : pct < 66 ? 1 : pct < 100 ? 2 : 3;
