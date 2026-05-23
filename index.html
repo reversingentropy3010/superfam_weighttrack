@@ -169,7 +169,8 @@
     .race-track-progress { height: 100%; transition: width 1.2s cubic-bezier(.34,1.56,.64,1); }
     .race-track-grid { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), #ffffff07 calc(10% - 1px), #ffffff07 10%); pointer-events: none; }
     .racer-pos { position: absolute; top: 0; bottom: 0; display: flex; align-items: flex-end; padding-bottom: 4px; transition: left 1.2s cubic-bezier(.34,1.56,.64,1); }
-    .race-finish-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 2rem; pointer-events: none; }
+    .race-finish-icon { position: absolute; right: 0; top: 0; bottom: 0; width: 22px; background: repeating-conic-gradient(#fff 0% 25%, #111 0% 50%) 0 0 / 11px 11px; opacity: .85; pointer-events: none; }
+    .race-finish-icon.done { background: #10b98166; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; opacity: 1; }
     .racer-anim { display: flex; animation: raceRun .3s ease-in-out infinite alternate; }
     .racer-anim.hold { animation: raceHold 2s ease-in-out infinite alternate; }
     @keyframes raceRun  { from { transform: translateY(0);     } to { transform: translateY(-15px); } }
@@ -759,10 +760,33 @@ function switchChart(mode) {
 // ── Race view ────────────────────────────────────────────
 // Sprite sheet: 3 cols (fat/medium/lean) × 3 rows (chicken/horse/dragon)
 var RACERS = {
-  SC:  { row: 0, nickname: 'Clucky'         },
-  JC:  { row: 1, nickname: 'Thunderhooves'  },
-  CHC: { row: 2, nickname: 'Blaze'          },
+  SC:  { row: 0 },
+  JC:  { row: 1 },
+  CHC: { row: 2 },
 };
+var ANIMAL_QUOTES = [
+  // Chicken (SC, row 0) — super fat / fat / healthy / goal
+  [
+    'If I don\'t lose weight soon, I\'m getting turned into Korean fried chicken\u2026',
+    'Why did the chicken cross the road? It saw the buffet on the other side.',
+    'Look at me, this is poultry in motion',
+    'Lean, full of protein, and no longer on any menu screen.',
+  ],
+  // Horse (JC, row 1)
+  [
+    'Run? Even standing still feels like a workout.',
+    'Running is possible, but only in spirit.',
+    'With great horse power comes great responsibility.',
+    'I don\'t follow the herd. I set the pace.',
+  ],
+  // Dragon (CHC, row 2)
+  [
+    'I can\'t fly, I failed the negotiation with gravity',
+    'Even my wings need a nap after flapping.',
+    'Still dangerous.. just more aerodynamic',
+    'Legends don\'t grow weaker. They refine.',
+  ],
+];
 
 function renderRace(scored) {
   var el = document.getElementById('race-lanes');
@@ -775,18 +799,16 @@ function renderRace(scored) {
       var curW = cur ? cur.weight : p.startWeight;
       var pct  = progressPct(p.startWeight, p.goalWeight, curW);
       var isP2 = p.sd.phase === 2;
-      var r    = RACERS[p.id] || { row: 0, nickname: p.name };
+      var r    = RACERS[p.id] || { row: 0 };
 
       // Sprite sheet: col = body stage (0=fat/1=medium/2=lean), row = animal
-      // Pixel-based positioning avoids sub-pixel bleed at tile seams (especially col 1)
+      // Col 2 offset adjusted -4px to include nose that extends across tile boundary
       var spriteCol = pct < 33 ? 0 : pct < 66 ? 1 : 2;
-      var bpx = (-spriteCol * 200) + 'px';  // 0px, -200px, -400px
+      var bpx = spriteCol === 2 ? '-396px' : (-spriteCol * 200) + 'px';  // 0px, -200px, -396px
       var bpy = (-r.row    * 160) + 'px';   // 0px, -160px, -320px
 
-      var bodyStage = pct < 33  ? 'Looking a little chunky...'
-                    : pct < 66  ? 'Getting there!'
-                    : pct < 100 ? 'Looking lean!'
-                    :             'Goal achieved! 🛡️';
+      var quoteIdx  = pct < 33 ? 0 : pct < 66 ? 1 : pct < 100 ? 2 : 3;
+      var bodyStage = '\u201c' + ANIMAL_QUOTES[r.row][quoteIdx] + '\u201d';
 
       var kgLost = (p.startWeight - curW);
 
@@ -796,7 +818,6 @@ function renderRace(scored) {
         + '<div class="race-lane-top">'
         +   '<div class="race-animal-name" style="color:' + p.color + '">'
         +     p.name
-        +     ' <span style="font-weight:400;font-size:.78rem;color:var(--text-muted)">&ldquo;' + r.nickname + '&rdquo;</span>'
         +   '</div>'
         +   '<div class="race-lane-stats">'
         +     (isP2
@@ -813,7 +834,7 @@ function renderRace(scored) {
         +       '<div class="racer-sprite" style="background-position:' + bpx + ' ' + bpy + '"></div>'
         +     '</div>'
         +   '</div>'
-        +   '<div class="race-finish-icon">' + (isP2 ? '✅' : '🏁') + '</div>'
+        +   '<div class="race-finish-icon' + (isP2 ? ' done">✅' : '">') + '</div>'
         + '</div>'
         + '<div class="race-lane-bottom">'
         +   '<span class="race-pct-label" style="color:' + p.color + '">' + fmt(pct, 0) + '%</span>'
