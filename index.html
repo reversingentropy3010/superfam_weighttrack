@@ -165,19 +165,17 @@
     .race-lane-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
     .race-animal-name { font-size: 1.1rem; font-weight: 800; }
     .race-lane-stats  { font-size: .8rem; color: var(--text-muted); text-align: right; line-height: 1.6; }
-    /* two-column body */
-    .race-body { display: flex; gap: 1.35rem; align-items: stretch; }
-    .race-avatar-box { flex-shrink: 0; width: 220px; min-height: 180px; background: linear-gradient(170deg, #10101e 0%, #060610 100%); border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; overflow: hidden; }
-    .race-info { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 1rem; padding-top: .35rem; }
-    .race-progress-outer { position: relative; height: 24px; background: #060610; border-radius: 999px; overflow: hidden; border: 1px solid var(--border); }
-    .race-progress-fill { height: 100%; border-radius: 999px; transition: width 1.2s cubic-bezier(.34,1.56,.64,1); }
-    .race-finish-flag { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font-size: 1.05rem; line-height: 1; pointer-events: none; }
+    .race-track-outer { position: relative; height: 180px; background: #060610; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+    .race-track-progress { height: 100%; transition: width 1.2s cubic-bezier(.34,1.56,.64,1); }
+    .race-track-grid { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), #ffffff07 calc(10% - 1px), #ffffff07 10%); pointer-events: none; }
+    .racer-pos { position: absolute; top: 0; bottom: 0; display: flex; align-items: flex-end; padding-bottom: 4px; transition: left 1.2s cubic-bezier(.34,1.56,.64,1); }
+    .race-finish-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 2rem; pointer-events: none; }
     .racer-anim { display: flex; animation: raceRun .3s ease-in-out infinite alternate; }
     .racer-anim.hold { animation: raceHold 2s ease-in-out infinite alternate; }
     @keyframes raceRun  { from { transform: translateY(0);     } to { transform: translateY(-15px); } }
     @keyframes raceHold { from { transform: translateY(-7px);  } to { transform: translateY(7px);   } }
     .racer-sprite { width: 200px; height: 160px; background-image: url('animals.png'); background-size: 300% 300%; background-repeat: no-repeat; background-color: transparent; image-rendering: auto; flex-shrink: 0; transform: scaleX(-1); }
-    .race-lane-bottom { display: flex; justify-content: space-between; align-items: center; font-size: .8rem; flex-wrap: wrap; gap: .35rem; }
+    .race-lane-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: .7rem; font-size: .8rem; flex-wrap: wrap; gap: .35rem; }
     .race-pct-label  { font-size: 1rem; font-weight: 800; }
     .race-body-stage { color: var(--text-muted); font-style: italic; }
     .race-weight-inf { color: var(--text-muted); }
@@ -186,8 +184,6 @@
       .cards-grid { grid-template-columns: 1fr; }
       .lb-card { flex: 1 1 140px; }
       #dev-console { width: calc(100vw - 2rem); right: 1rem; }
-      .race-body { flex-direction: column; }
-      .race-avatar-box { width: 100%; min-height: 130px; }
     }
   </style>
 </head>
@@ -782,9 +778,10 @@ function renderRace(scored) {
       var r    = RACERS[p.id] || { row: 0, nickname: p.name };
 
       // Sprite sheet: col = body stage (0=fat/1=medium/2=lean), row = animal
+      // Pixel-based positioning avoids sub-pixel bleed at tile seams (especially col 1)
       var spriteCol = pct < 33 ? 0 : pct < 66 ? 1 : 2;
-      var bpx = (spriteCol / 2 * 100) + '%';  // 0%, 50%, 100%
-      var bpy = (r.row    / 2 * 100) + '%';   // 0%, 50%, 100%
+      var bpx = (-spriteCol * 200) + 'px';  // 0px, -200px, -400px
+      var bpy = (-r.row    * 160) + 'px';   // 0px, -160px, -320px
 
       var bodyStage = pct < 33  ? 'Looking a little chunky...'
                     : pct < 66  ? 'Getting there!'
@@ -792,6 +789,8 @@ function renderRace(scored) {
                     :             'Goal achieved! 🛡️';
 
       var kgLost = (p.startWeight - curW);
+
+      var trackPos = isP2 ? 80 : Math.min(75, 17 + pct * 0.58);
 
       return '<div class="race-lane" style="--lane-color:' + p.color + '">'
         + '<div class="race-lane-top">'
@@ -806,23 +805,20 @@ function renderRace(scored) {
                 + ' &middot; ' + fmt(kgLost, 1) + ' kg lost')
         +   '</div>'
         + '</div>'
-        + '<div class="race-body">'
-        +   '<div class="race-avatar-box">'
+        + '<div class="race-track-outer">'
+        +   '<div class="race-track-progress" style="width:' + pct + '%;background:' + p.color + '25"></div>'
+        +   '<div class="race-track-grid"></div>'
+        +   '<div class="racer-pos" style="left:calc(' + trackPos + '% - 100px)">'
         +     '<div class="racer-anim' + (isP2 ? ' hold' : '') + '">'
         +       '<div class="racer-sprite" style="background-position:' + bpx + ' ' + bpy + '"></div>'
         +     '</div>'
         +   '</div>'
-        +   '<div class="race-info">'
-        +     '<div class="race-progress-outer">'
-        +       '<div class="race-progress-fill" style="width:' + pct + '%;background:' + p.color + '60"></div>'
-        +       '<div class="race-finish-flag">' + (isP2 ? '✅' : '🏁') + '</div>'
-        +     '</div>'
-        +     '<div class="race-lane-bottom">'
-        +       '<span class="race-pct-label" style="color:' + p.color + '">' + fmt(pct, 0) + '%</span>'
-        +       '<span class="race-body-stage">' + bodyStage + '</span>'
-        +       '<span class="race-weight-inf">' + curW + ' kg → ' + p.goalWeight + ' kg goal</span>'
-        +     '</div>'
-        +   '</div>'
+        +   '<div class="race-finish-icon">' + (isP2 ? '✅' : '🏁') + '</div>'
+        + '</div>'
+        + '<div class="race-lane-bottom">'
+        +   '<span class="race-pct-label" style="color:' + p.color + '">' + fmt(pct, 0) + '%</span>'
+        +   '<span class="race-body-stage">' + bodyStage + '</span>'
+        +   '<span class="race-weight-inf">' + curW + ' kg → ' + p.goalWeight + ' kg goal</span>'
         + '</div>'
         + '</div>';
     }).join('');
