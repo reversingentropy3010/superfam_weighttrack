@@ -2,8 +2,8 @@
   "deadline": "2027-11-01",
   "participants": [
     {
-      "id": "CC",
-      "name": "CC",
+      "id": "SC",
+      "name": "SC",
       "startWeight": 90,
       "goalWeight": 75,
       "color": "#6366f1",

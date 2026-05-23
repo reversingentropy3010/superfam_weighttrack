@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Weight Loss Challenge 🏆</title>
+  <title>SuperFam Weight Challenge 🏆</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,14 +20,8 @@
       --bronze: #b87333;
     }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      min-height: 100vh;
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
 
-    /* ── Header ── */
     header {
       background: linear-gradient(135deg, #1e1b4b 0%, #0f0f13 60%);
       border-bottom: 1px solid var(--border);
@@ -38,203 +32,135 @@
     header h1 span { color: var(--gold); }
     header p { color: var(--text-muted); margin-top: .4rem; font-size: .95rem; }
 
-    /* ── Countdown ── */
-    #countdown {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 1.4rem;
-      flex-wrap: wrap;
-    }
-    .cd-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: .6rem 1.1rem;
-      min-width: 72px;
-      text-align: center;
-    }
+    .phase-legend { display: flex; gap: 1.25rem; justify-content: center; margin-top: .9rem; flex-wrap: wrap; font-size: .8rem; }
+    .phase-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .85rem; border-radius: 999px; font-weight: 600; }
+    .phase-pill.p1 { background: #6366f122; border: 1px solid #6366f155; color: #a5b4fc; }
+    .phase-pill.p2 { background: #10b98122; border: 1px solid #10b98155; color: #6ee7b7; }
+
+    #countdown { display: flex; gap: 1rem; justify-content: center; margin-top: 1.4rem; flex-wrap: wrap; }
+    .cd-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .6rem 1.1rem; min-width: 72px; text-align: center; }
     .cd-box .num { font-size: 1.8rem; font-weight: 700; color: var(--gold); line-height: 1; }
     .cd-box .lbl { font-size: .65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
-    /* ── Layout ── */
-    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-
+    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
     section { margin-bottom: 2.5rem; }
-    section h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--text-muted);
-      margin-bottom: 1rem;
-    }
+    section > h2 { font-size: .9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: .35rem; }
+    .section-sub { font-size: .8rem; color: var(--text-muted); margin-bottom: 1rem; }
 
-    /* ── Podium ── */
-    #podium {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .podium-card {
-      flex: 1 1 180px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem;
-      position: relative;
-      overflow: hidden;
-      transition: transform .2s;
-    }
-    .podium-card:hover { transform: translateY(-3px); }
-    .podium-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 14px;
-      opacity: .07;
-    }
-    .podium-card.rank-1::before { background: var(--gold); }
-    .podium-card.rank-2::before { background: var(--silver); }
-    .podium-card.rank-3::before { background: var(--bronze); }
-    .podium-card .medal { font-size: 1.7rem; line-height: 1; }
-    .podium-card .p-name {
-      font-size: 1.35rem;
-      font-weight: 800;
-      margin: .3rem 0 .1rem;
-    }
-    .podium-card .p-delta {
-      font-size: .9rem;
-      font-weight: 600;
-    }
-    .podium-card .p-delta.good { color: #34d399; }
-    .podium-card .p-delta.neutral { color: var(--text-muted); }
-    .podium-card .p-sub { font-size: .78rem; color: var(--text-muted); margin-top: .15rem; }
+    #leaderboard { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .lb-card { flex: 1 1 190px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; position: relative; overflow: hidden; transition: transform .2s; }
+    .lb-card:hover { transform: translateY(-3px); }
+    .lb-card::before { content: ''; position: absolute; inset: 0; border-radius: 14px; opacity: .06; pointer-events: none; }
+    .lb-card.rank-1::before { background: var(--gold); }
+    .lb-card.rank-2::before { background: var(--silver); }
+    .lb-card.rank-3::before { background: var(--bronze); }
+    .lb-medal { font-size: 1.6rem; line-height: 1; }
+    .lb-name { font-size: 1.3rem; font-weight: 800; margin: .3rem 0 .1rem; }
+    .lb-pts { font-size: 1.8rem; font-weight: 800; color: var(--gold); line-height: 1.1; }
+    .lb-pts-lbl { font-size: .65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .lb-sub { font-size: .78rem; color: var(--text-muted); margin-top: .4rem; line-height: 1.5; }
+    .phase-badge { display: inline-block; font-size: .65rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px; margin-top: .4rem; }
+    .phase-badge.p1 { background: #6366f133; color: #a5b4fc; }
+    .phase-badge.p2 { background: #10b98133; color: #6ee7b7; }
 
-    /* ── Participant cards ── */
-    #cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.25rem;
-    }
-    .p-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.4rem 1.4rem 1.2rem;
-      border-top: 3px solid var(--accent);
-    }
-    .p-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-    }
-    .p-card-name { font-size: 1.4rem; font-weight: 800; }
-    .p-card-badge {
-      font-size: .72rem;
-      font-weight: 700;
-      padding: .3rem .7rem;
-      border-radius: 999px;
-      background: var(--accent);
-      color: #fff;
-      opacity: .9;
-    }
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: .55rem;
-      font-size: .88rem;
-    }
+    .phase-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.1rem; }
+    .p-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; border-top: 3px solid var(--accent, #6366f1); }
+    .p-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .9rem; }
+    .p-card-name { font-size: 1.25rem; font-weight: 800; }
+    .p-card-pts { text-align: right; }
+    .p-card-pts .pts-num { font-size: 1.2rem; font-weight: 800; color: var(--gold); }
+    .p-card-pts .pts-lbl { font-size: .62rem; color: var(--text-muted); text-transform: uppercase; }
+    .stat-row { display: flex; justify-content: space-between; margin-bottom: .45rem; font-size: .86rem; }
     .stat-label { color: var(--text-muted); }
     .stat-value { font-weight: 600; }
-    .stat-value.positive { color: #34d399; }
-    .stat-value.negative { color: #f87171; }
+    .stat-value.pos { color: #34d399; }
+    .stat-value.neg { color: #f87171; }
+    .stat-value.gold { color: var(--gold); }
+    .prog-track { height: 8px; background: var(--bg); border-radius: 999px; margin: .85rem 0 .3rem; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 999px; background: var(--accent, #6366f1); transition: width .6s ease; }
+    .prog-labels { display: flex; justify-content: space-between; font-size: .71rem; color: var(--text-muted); }
+    .prog-pct { text-align: center; font-size: .78rem; font-weight: 700; margin-top: .25rem; }
+    .streak-badge { display: inline-flex; align-items: center; gap: .3rem; background: #78350f33; border: 1px solid #92400e55; color: #fbbf24; font-size: .7rem; font-weight: 700; padding: .2rem .6rem; border-radius: 999px; margin-top: .5rem; }
 
-    /* Progress bar */
-    .prog-track {
-      height: 10px;
-      background: var(--surface2);
-      border-radius: 999px;
-      margin: .9rem 0 .35rem;
-      overflow: hidden;
-    }
-    .prog-fill {
-      height: 100%;
-      border-radius: 999px;
-      background: var(--accent);
-      transition: width .6s ease;
-    }
-    .prog-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: .73rem;
-      color: var(--text-muted);
-    }
-    .prog-pct { text-align: center; font-size: .8rem; font-weight: 700; color: var(--accent); margin-top: .3rem; }
+    details.score-bd { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: .75rem; }
+    details.score-bd > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: .5rem; padding: .9rem 1.2rem; user-select: none; font-size: .9rem; }
+    details.score-bd > summary::-webkit-details-marker { display: none; }
+    details.score-bd[open] > summary { border-bottom: 1px solid var(--border); }
+    .bd-toggle { margin-left: .25rem; color: var(--text-muted); font-size: .7rem; transition: transform .2s; }
+    details.score-bd[open] .bd-toggle { transform: rotate(180deg); }
+    .bd-inner { padding: 1rem 1.2rem; overflow-x: auto; }
+    .bd-inner table { width: 100%; border-collapse: collapse; font-size: .83rem; min-width: 420px; }
+    .bd-inner thead th { background: var(--surface2); padding: .55rem .9rem; text-align: left; color: var(--text-muted); font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .bd-inner tbody tr { border-top: 1px solid var(--border); }
+    .bd-inner tbody tr:hover { background: var(--surface2); }
+    .bd-inner tbody td { padding: .5rem .9rem; }
+    .bd-inner .total-row td { font-weight: 800; color: var(--gold); border-top: 2px solid var(--border); }
+    .ev-type { display: inline-block; font-size: .67rem; font-weight: 700; padding: .1rem .42rem; border-radius: 4px; }
+    .ev-loss     { background: #1e3a5f; color: #93c5fd; }
+    .ev-maintain { background: #064e3b; color: #6ee7b7; }
+    .ev-goal     { background: #451a03; color: #fbbf24; }
+    .ev-streak   { background: #4a044e; color: #e879f9; }
+    .ev-win      { background: #1c1917; color: var(--gold); }
 
-    /* ── Chart ── */
-    .chart-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.25rem;
-    }
+    details.scoring-legend { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: .85rem; }
+    details.scoring-legend > summary { cursor: pointer; list-style: none; font-size: .85rem; font-weight: 700; color: var(--text-muted); user-select: none; }
+    details.scoring-legend > summary::-webkit-details-marker { display: none; }
+    details.scoring-legend[open] > summary { margin-bottom: .9rem; }
+    .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .45rem .75rem; font-size: .82rem; }
+    .legend-item { color: var(--text-muted); }
+    .legend-item strong { color: var(--text); }
+
+    .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; }
     canvas { max-height: 340px; }
 
-    /* ── History table ── */
-    .table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: auto;
-    }
-    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-    thead th {
-      background: var(--surface2);
-      padding: .7rem 1rem;
-      text-align: left;
-      color: var(--text-muted);
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 700;
-    }
-    tbody tr { border-top: 1px solid var(--border); }
-    tbody tr:hover { background: var(--surface2); }
-    tbody td { padding: .65rem 1rem; }
-    .winner-row td:first-child { color: var(--gold); font-weight: 700; }
-    .tag {
-      display: inline-block;
-      font-size: .7rem;
-      font-weight: 700;
-      padding: .15rem .5rem;
-      border-radius: 4px;
-      margin-left: .4rem;
-    }
-    .tag-best { background: #451a03; color: var(--gold); }
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: auto; }
+    table.hist { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    table.hist thead th { background: var(--surface2); padding: .65rem 1rem; text-align: left; color: var(--text-muted); font-size: .73rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; white-space: nowrap; }
+    table.hist tbody tr { border-top: 1px solid var(--border); }
+    table.hist tbody tr:hover { background: var(--surface2); }
+    table.hist tbody td { padding: .6rem 1rem; white-space: nowrap; }
+    .tag { display: inline-block; font-size: .67rem; font-weight: 700; padding: .1rem .4rem; border-radius: 4px; margin-left: .3rem; }
     .tag-gain { background: #450a0a; color: #f87171; }
+    .tag-goal { background: #064e3b; color: #6ee7b7; }
 
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: .8rem;
-      padding: 2rem 1rem;
-      border-top: 1px solid var(--border);
-    }
+    footer { text-align: center; color: var(--text-muted); font-size: .8rem; padding: 2rem 1rem; border-top: 1px solid var(--border); }
 
-    @media (max-width: 480px) {
-      #cards { grid-template-columns: 1fr; }
-      .podium-card { flex: 1 1 140px; }
+    #dev-toggle { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1e1b4b; border: 1px solid #4338ca; color: #a5b4fc; font-size: .8rem; font-weight: 700; padding: .55rem .95rem; border-radius: 10px; cursor: pointer; z-index: 1000; display: flex; align-items: center; gap: .4rem; transition: background .2s; }
+    #dev-toggle:hover { background: #312e81; }
+    #dev-console { position: fixed; bottom: 4.5rem; right: 1.5rem; width: 320px; max-height: 72vh; background: #0d0d18; border: 1px solid #4338ca; border-radius: 14px; box-shadow: 0 8px 40px #00000099; z-index: 999; display: none; flex-direction: column; overflow: hidden; }
+    #dev-console.open { display: flex; }
+    .dev-hdr { padding: .85rem 1.1rem; background: #1e1b4b; font-weight: 800; font-size: .85rem; color: #a5b4fc; border-bottom: 1px solid #4338ca55; flex-shrink: 0; }
+    .dev-body { padding: 1rem; overflow-y: auto; flex: 1; }
+    .dev-field { margin-bottom: .8rem; }
+    .dev-field label { display: block; font-size: .72rem; color: var(--text-muted); margin-bottom: .28rem; text-transform: uppercase; letter-spacing: .5px; }
+    .dev-field select, .dev-field input[type="number"], .dev-field input[type="month"] { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: .45rem .7rem; border-radius: 7px; font-size: .85rem; }
+    .dev-field select:focus, .dev-field input:focus { outline: none; border-color: #6366f1; }
+    .dev-btn { width: 100%; padding: .55rem; border: none; border-radius: 7px; font-weight: 700; font-size: .83rem; cursor: pointer; transition: opacity .2s; margin-bottom: .45rem; }
+    .dev-btn:hover { opacity: .82; }
+    .dev-btn-primary   { background: #4f46e5; color: #fff; }
+    .dev-btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+    .dev-btn-danger    { background: #7f1d1d; color: #fca5a5; }
+    .dev-divider { border: none; border-top: 1px solid var(--border); margin: .65rem 0; }
+    .dev-log { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: .5rem .7rem; font-size: .74rem; color: #34d399; font-family: monospace; min-height: 32px; max-height: 72px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+    .dev-log.err { color: #f87171; }
+
+    @media (max-width: 520px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .lb-card { flex: 1 1 140px; }
+      #dev-console { width: calc(100vw - 2rem); right: 1rem; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>⚖️ Weight Loss <span>Challenge</span></h1>
+  <h1>⚖️ SuperFam Weight <span>Challenge</span></h1>
   <p>Monthly weigh-ins · Deadline <strong>November 1, 2027</strong></p>
+  <div class="phase-legend">
+    <span class="phase-pill p1">🏃 Phase 1: The Race — Reach your goal weight</span>
+    <span class="phase-pill p2">🛡️ Phase 2: The Hold — Maintain at goal</span>
+  </div>
   <div id="countdown">
     <div class="cd-box"><div class="num" id="cd-months">–</div><div class="lbl">Months</div></div>
     <div class="cd-box"><div class="num" id="cd-days">–</div><div class="lbl">Days</div></div>
@@ -244,353 +170,565 @@
 </header>
 
 <main>
-  <!-- This Month's Leaderboard -->
+
   <section>
-    <h2>🏆 This Month's Leaderboard</h2>
-    <div id="podium"></div>
+    <h2>🏆 Points Leaderboard</h2>
+    <p class="section-sub">Ranked by total points earned across both phases</p>
+    <div id="leaderboard"></div>
   </section>
 
-  <!-- Participant Cards -->
-  <section>
-    <h2>📊 Progress Tracker</h2>
-    <div id="cards"></div>
-  </section>
-
-  <!-- Chart -->
-  <section>
-    <h2>📈 Weight Over Time</h2>
-    <div class="chart-wrap">
-      <canvas id="weightChart"></canvas>
+  <section id="s-phase1">
+    <h2>🏃 Phase 1 — The Race</h2>
+    <p class="section-sub">Earning points by losing weight toward their goal</p>
+    <div class="phase-section">
+      <div class="cards-grid" id="phase1-cards"></div>
     </div>
   </section>
 
-  <!-- History -->
+  <section id="s-phase2" style="display:none">
+    <h2>🛡️ Phase 2 — The Hold</h2>
+    <p class="section-sub">Goal reached! Now earning points every month they maintain</p>
+    <div class="phase-section">
+      <div class="cards-grid" id="phase2-cards"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>📋 Score Breakdown</h2>
+    <p class="section-sub">Click a player to see their full point history</p>
+    <details class="scoring-legend">
+      <summary>📖 Scoring Rules ▾</summary>
+      <div class="legend-grid">
+        <div class="legend-item">🏃 <strong>10 pts</strong> per kg lost (Phase 1)</div>
+        <div class="legend-item">🛡️ <strong>50 pts</strong> per month at/below goal (Phase 2)</div>
+        <div class="legend-item">⬇️ <strong>+5 pts</strong> per kg under goal, max +25</div>
+        <div class="legend-item">🎯 <strong>75–150 pts</strong> one-time goal-hit bonus (more if early)</div>
+        <div class="legend-item">🔥 <strong>+20 pts</strong> at 3-month consecutive streak</div>
+        <div class="legend-item">🔥 <strong>+40 pts</strong> at 6-month consecutive streak</div>
+        <div class="legend-item">🔥 <strong>+80 pts</strong> at 12-month consecutive streak</div>
+        <div class="legend-item">🏆 <strong>+25 pts</strong> for winning a given month</div>
+      </div>
+    </details>
+    <div id="score-bd-container"></div>
+  </section>
+
+  <section>
+    <h2>📈 Weight Over Time</h2>
+    <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
+  </section>
+
   <section>
     <h2>📅 Weigh-In History</h2>
     <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th id="th-0"></th>
-            <th id="th-1"></th>
-            <th id="th-2"></th>
-            <th>Monthly Winner</th>
-          </tr>
-        </thead>
+      <table class="hist">
+        <thead><tr id="hist-head"></tr></thead>
         <tbody id="hist-body"></tbody>
       </table>
     </div>
   </section>
+
 </main>
 
-<footer>
-  Data updates each month on the 1st. Last updated: <span id="last-updated">–</span>
-</footer>
+<footer>Data updates each month on the 1st. Last updated: <span id="last-updated">–</span></footer>
+
+<button id="dev-toggle" onclick="devToggle()">🛠️ Dev Console</button>
+<div id="dev-console">
+  <div class="dev-hdr">🛠️ Developer Console</div>
+  <div class="dev-body">
+    <div class="dev-field">
+      <label>Participant</label>
+      <select id="dc-participant"></select>
+    </div>
+    <div class="dev-field">
+      <label>Weigh-In Month</label>
+      <input type="month" id="dc-date" />
+    </div>
+    <div class="dev-field">
+      <label>Weight (kg)</label>
+      <input type="number" id="dc-weight" step="0.1" min="30" max="300" placeholder="e.g. 88.5" />
+    </div>
+    <button class="dev-btn dev-btn-primary" onclick="dcInject()">➕ Inject Weigh-In</button>
+    <button class="dev-btn dev-btn-secondary" onclick="dcExport()">📥 Export data.json</button>
+    <hr class="dev-divider" />
+    <button class="dev-btn dev-btn-danger" onclick="dcReset()">↩ Reset to Original Data</button>
+    <hr class="dev-divider" />
+    <div class="dev-field">
+      <label>Console</label>
+      <div class="dev-log" id="dc-log">Ready.</div>
+    </div>
+  </div>
+</div>
 
 <script>
-// ── Fetch & render ──────────────────────────────────────────────────
-async function loadData() {
-  const res = await fetch('data.json?v=' + Date.now());
-  return res.json();
+'use strict';
+
+// ── Scoring constants ───────────────────────────────────────────────
+var SC = {
+  LOSS_PER_KG:        10,
+  MAINTAIN_BASE:      50,
+  UNDER_PER_KG:        5,
+  UNDER_CAP:          25,
+  GOAL_BASE:          75,
+  GOAL_EARLY_MAX:     75,
+  STREAK_MILESTONES: [[3, 20], [6, 40], [12, 80]],
+  MONTHLY_WIN:        25,
+};
+
+var _original = null;
+var _data     = null;
+var _chart    = null;
+
+// ── Utilities ────────────────────────────────────────────────────────
+function fmt(v, d) { return Number(v).toFixed(d !== undefined ? d : 1); }
+
+function allDates(participants) {
+  var s = new Set();
+  participants.forEach(function(p) { p.entries.forEach(function(e) { s.add(e.date); }); });
+  return Array.from(s).sort();
 }
 
-function fmt(val, decimals = 1) {
-  return val.toFixed(decimals);
+function weightOn(p, date) {
+  var e = p.entries.find(function(x) { return x.date === date; });
+  return e != null ? e.weight : null;
 }
 
-function delta(current, prev) {
-  const d = current - prev;
-  return (d >= 0 ? '+' : '') + fmt(d) + ' kg';
+function sortedEntries(p) {
+  return p.entries.slice().sort(function(a, b) { return a.date.localeCompare(b.date); });
+}
+
+function lastEntry(p) {
+  var s = sortedEntries(p);
+  return s.length ? s[s.length - 1] : null;
 }
 
 function progressPct(start, goal, current) {
-  const total = start - goal;
+  var total = start - goal;
   if (total <= 0) return 100;
-  const done = start - current;
-  return Math.min(100, Math.max(0, (done / total) * 100));
+  return Math.min(100, Math.max(0, ((start - current) / total) * 100));
 }
 
-// Countdown
+function monthsBetween(d1, d2) {
+  var pad = function(s) { return s.length === 7 ? s + '-01' : s; };
+  var a = new Date(pad(d1));
+  var b = new Date(pad(d2));
+  return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+}
+
+function shortDate(dateStr) {
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+function longDate(dateStr) {
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+// ── Scoring engine ──────────────────────────────────────────────────
+function computeScores(data) {
+  var participants = data.participants;
+  var deadline     = data.deadline;
+  var dates        = allDates(participants);
+  var challengeStart = dates.length ? dates[0] : deadline;
+  var totalMonths  = Math.max(1, monthsBetween(challengeStart, deadline));
+
+  var scored = participants.map(function(p) {
+    var entries       = sortedEntries(p);
+    var events        = [];
+    var monthlyPerf   = {};
+    var total         = 0;
+    var streak        = 0;
+    var phase         = 1;
+    var goalAchievedDate = null;
+
+    for (var i = 1; i < entries.length; i++) {
+      var prev   = entries[i - 1];
+      var curr   = entries[i];
+      var kgLost = prev.weight - curr.weight;
+
+      if (phase === 1) {
+        if (kgLost > 0) {
+          var pts = Math.round(kgLost * SC.LOSS_PER_KG * 10) / 10;
+          total  += pts;
+          streak++;
+          events.push({ date: curr.date, type: 'loss', pts: pts, note: 'Lost ' + fmt(kgLost) + ' kg' });
+          monthlyPerf[curr.date] = pts;
+          SC.STREAK_MILESTONES.forEach(function(m) {
+            if (streak === m[0]) {
+              total += m[1];
+              events.push({ date: curr.date, type: 'streak', pts: m[1], note: m[0] + '-month streak 🔥' });
+            }
+          });
+        } else {
+          streak = 0;
+          var note = kgLost < 0 ? 'Gained ' + fmt(Math.abs(kgLost)) + ' kg' : 'No change';
+          events.push({ date: curr.date, type: 'loss', pts: 0, note: note });
+          monthlyPerf[curr.date] = 0;
+        }
+
+        if (curr.weight <= p.goalWeight && goalAchievedDate === null) {
+          goalAchievedDate = curr.date;
+          var monthsLeft   = Math.max(0, monthsBetween(curr.date, deadline));
+          var earlyFrac    = monthsLeft / totalMonths;
+          var goalBonus    = Math.round(SC.GOAL_BASE + earlyFrac * SC.GOAL_EARLY_MAX);
+          total += goalBonus;
+          events.push({
+            date: curr.date, type: 'goal', pts: goalBonus,
+            note: 'Goal reached! (' + monthsLeft + ' months remaining = ' + goalBonus + ' pts)',
+          });
+          phase  = 2;
+          streak = 1;
+        }
+
+      } else {
+        if (curr.weight <= p.goalWeight) {
+          var kgUnder    = p.goalWeight - curr.weight;
+          var underBonus = Math.min(SC.UNDER_CAP, Math.round(kgUnder * SC.UNDER_PER_KG * 10) / 10);
+          var mpts       = SC.MAINTAIN_BASE + underBonus;
+          total  += mpts;
+          streak++;
+          var underNote = kgUnder > 0 ? ' (' + fmt(kgUnder) + ' kg under goal)' : ' (exactly at goal)';
+          events.push({ date: curr.date, type: 'maintain', pts: mpts, note: 'Maintained' + underNote });
+          monthlyPerf[curr.date] = mpts;
+          SC.STREAK_MILESTONES.forEach(function(m) {
+            if (streak === m[0]) {
+              total += m[1];
+              events.push({ date: curr.date, type: 'streak', pts: m[1], note: m[0] + '-month streak 🔥' });
+            }
+          });
+        } else {
+          var kgOver = curr.weight - p.goalWeight;
+          streak = 0;
+          events.push({ date: curr.date, type: 'maintain', pts: 0, note: fmt(kgOver) + ' kg above goal – no pts' });
+          monthlyPerf[curr.date] = 0;
+        }
+      }
+    }
+
+    return Object.assign({}, p, { sd: { total: total, events: events, monthlyPerf: monthlyPerf, phase: phase, streak: streak, goalAchievedDate: goalAchievedDate } });
+  });
+
+  // Monthly winners
+  var monthlyWinners = {};
+  for (var di = 1; di < dates.length; di++) {
+    var date    = dates[di];
+    var bestPts = 0;
+    scored.forEach(function(p) {
+      if (p.sd.monthlyPerf[date] !== undefined && p.sd.monthlyPerf[date] > bestPts) {
+        bestPts = p.sd.monthlyPerf[date];
+      }
+    });
+    if (bestPts <= 0) continue;
+    var winners = scored.filter(function(p) { return p.sd.monthlyPerf[date] === bestPts; });
+    monthlyWinners[date] = winners.map(function(p) { return p.id; });
+    winners.forEach(function(p) {
+      p.sd.total += SC.MONTHLY_WIN;
+      p.sd.events.push({ date: date, type: 'win', pts: SC.MONTHLY_WIN, note: 'Monthly winner 🏆' });
+    });
+  }
+
+  scored.forEach(function(p) {
+    p.sd.events.sort(function(a, b) { return a.date.localeCompare(b.date); });
+  });
+
+  return { scored: scored, monthlyWinners: monthlyWinners };
+}
+
+// ── Countdown ────────────────────────────────────────────────────────
 function startCountdown(deadline) {
   function tick() {
-    const now = new Date();
-    const end = new Date(deadline);
-    const diff = end - now;
+    var diff = new Date(deadline) - new Date();
     if (diff <= 0) {
-      document.getElementById('cd-months').textContent = '0';
-      document.getElementById('cd-days').textContent = '0';
-      document.getElementById('cd-hrs').textContent = '0';
-      document.getElementById('cd-min').textContent = '0';
+      ['cd-months','cd-days','cd-hrs','cd-min'].forEach(function(id) { document.getElementById(id).textContent = '0'; });
       return;
     }
-    const totalDays = Math.floor(diff / 864e5);
-    const months = Math.floor(totalDays / 30.44);
-    const remDays = Math.floor(totalDays % 30.44);
-    const hrs = Math.floor((diff % 864e5) / 36e5);
-    const mins = Math.floor((diff % 36e5) / 6e4);
-    document.getElementById('cd-months').textContent = months;
-    document.getElementById('cd-days').textContent = remDays;
-    document.getElementById('cd-hrs').textContent = hrs;
-    document.getElementById('cd-min').textContent = mins;
+    var totalDays = Math.floor(diff / 864e5);
+    document.getElementById('cd-months').textContent = Math.floor(totalDays / 30.44);
+    document.getElementById('cd-days').textContent   = Math.floor(totalDays % 30.44);
+    document.getElementById('cd-hrs').textContent    = Math.floor((diff % 864e5) / 36e5);
+    document.getElementById('cd-min').textContent    = Math.floor((diff % 36e5) / 6e4);
   }
   tick();
   setInterval(tick, 60000);
 }
 
-// Build all-dates list sorted
-function allDates(participants) {
-  const set = new Set();
-  participants.forEach(p => p.entries.forEach(e => set.add(e.date)));
-  return [...set].sort();
+// ── Render: Leaderboard ──────────────────────────────────────────────
+function renderLeaderboard(scored) {
+  var medals  = ['🥇','🥈','🥉'];
+  var rankCls = ['rank-1','rank-2','rank-3'];
+  var sorted  = scored.slice().sort(function(a, b) { return b.sd.total - a.sd.total; });
+  document.getElementById('leaderboard').innerHTML = sorted.map(function(p, i) {
+    var cur = lastEntry(p);
+    var pct = progressPct(p.startWeight, p.goalWeight, cur ? cur.weight : p.startWeight);
+    var pb  = p.sd.phase === 2
+      ? '<span class="phase-badge p2">🛡️ Phase 2 – Holding</span>'
+      : '<span class="phase-badge p1">🏃 Phase 1 – Racing</span>';
+    return '<div class="lb-card ' + (rankCls[i] || '') + '" style="--accent:' + p.color + '">'
+      + '<div class="lb-medal">' + (medals[i] || (i+1)+'.') + '</div>'
+      + '<div class="lb-name" style="color:' + p.color + '">' + p.name + '</div>'
+      + '<div class="lb-pts">' + Math.round(p.sd.total) + '</div>'
+      + '<div class="lb-pts-lbl">points</div>'
+      + '<div class="lb-sub">' + (cur ? cur.weight + ' kg current' : 'No data') + '<br>' + fmt(pct) + '% to goal</div>'
+      + pb + '</div>';
+  }).join('');
 }
 
-function weightOn(p, date) {
-  const e = p.entries.find(x => x.date === date);
-  return e ? e.weight : null;
-}
+// ── Render: Phase cards ──────────────────────────────────────────────
+function renderPhaseCards(scored) {
+  var p1 = scored.filter(function(p) { return p.sd.phase === 1; });
+  var p2 = scored.filter(function(p) { return p.sd.phase === 2; });
+  document.getElementById('s-phase2').style.display = p2.length ? '' : 'none';
 
-function lastEntry(p) {
-  if (!p.entries.length) return null;
-  const sorted = [...p.entries].sort((a, b) => a.date.localeCompare(b.date));
-  return sorted[sorted.length - 1];
-}
+  function cardHtml(p) {
+    var cur    = lastEntry(p);
+    var srtd   = sortedEntries(p);
+    var prev   = srtd.length >= 2 ? srtd[srtd.length - 2] : null;
+    var curW   = cur ? cur.weight : p.startWeight;
+    var change = (cur && prev) ? prev.weight - cur.weight : null;
+    var chStr  = change === null ? '—' : change > 0 ? '▼ ' + fmt(change) + ' kg' : change < 0 ? '▲ ' + fmt(Math.abs(change)) + ' kg' : '—';
+    var chCls  = change > 0 ? 'pos' : change < 0 ? 'neg' : '';
+    var streakBadge = p.sd.streak >= 2 ? '<div class="streak-badge">🔥 ' + p.sd.streak + '-month streak</div>' : '';
 
-function prevEntry(p) {
-  const sorted = [...p.entries].sort((a, b) => a.date.localeCompare(b.date));
-  return sorted.length >= 2 ? sorted[sorted.length - 2] : null;
-}
-
-// Monthly best: largest weight drop between last two shared weigh-in dates
-function monthlyWinner(participants, dates) {
-  if (dates.length < 2) return null;
-  const lastDate = dates[dates.length - 1];
-  const prevDate = dates[dates.length - 2];
-  let best = null;
-  let bestDrop = -Infinity;
-  participants.forEach(p => {
-    const cur = weightOn(p, lastDate);
-    const prv = weightOn(p, prevDate);
-    if (cur !== null && prv !== null) {
-      const drop = prv - cur;
-      if (drop > bestDrop) { bestDrop = drop; best = p; }
+    if (p.sd.phase === 1) {
+      var rem = curW - p.goalWeight;
+      var pct = progressPct(p.startWeight, p.goalWeight, curW);
+      return '<div class="p-card" style="--accent:' + p.color + '">'
+        + '<div class="p-card-header">'
+        +   '<div class="p-card-name" style="color:' + p.color + '">' + p.name + '</div>'
+        +   '<div class="p-card-pts"><div class="pts-num">' + Math.round(p.sd.total) + '</div><div class="pts-lbl">pts</div></div>'
+        + '</div>'
+        + '<div class="stat-row"><span class="stat-label">Current weight</span><span class="stat-value">' + fmt(curW) + ' kg</span></div>'
+        + '<div class="stat-row"><span class="stat-label">Goal weight</span><span class="stat-value">' + p.goalWeight + ' kg</span></div>'
+        + '<div class="stat-row"><span class="stat-label">Still to lose</span><span class="stat-value ' + (rem <= 0 ? 'pos' : '') + '">' + (rem > 0 ? fmt(rem) + ' kg' : '🎉 At goal!') + '</span></div>'
+        + '<div class="stat-row"><span class="stat-label">Last change</span><span class="stat-value ' + chCls + '">' + chStr + '</span></div>'
+        + '<div class="prog-track"><div class="prog-fill" style="width:' + pct + '%"></div></div>'
+        + '<div class="prog-labels"><span>' + p.startWeight + ' kg</span><span>🏁 ' + p.goalWeight + ' kg</span></div>'
+        + '<div class="prog-pct" style="color:' + p.color + '">' + fmt(pct, 0) + '% complete</div>'
+        + streakBadge + '</div>';
+    } else {
+      var kgUnder = p.goalWeight - curW;
+      var since   = p.sd.goalAchievedDate ? shortDate(p.sd.goalAchievedDate) : '–';
+      return '<div class="p-card" style="--accent:' + p.color + '">'
+        + '<div class="p-card-header">'
+        +   '<div class="p-card-name" style="color:' + p.color + '">' + p.name + '</div>'
+        +   '<div class="p-card-pts"><div class="pts-num">' + Math.round(p.sd.total) + '</div><div class="pts-lbl">pts</div></div>'
+        + '</div>'
+        + '<div class="stat-row"><span class="stat-label">Current weight</span><span class="stat-value">' + fmt(curW) + ' kg</span></div>'
+        + '<div class="stat-row"><span class="stat-label">Goal weight</span><span class="stat-value">' + p.goalWeight + ' kg</span></div>'
+        + '<div class="stat-row"><span class="stat-label">Status</span><span class="stat-value ' + (curW <= p.goalWeight ? 'pos' : 'neg') + '">' + (curW <= p.goalWeight ? '✅ ' + fmt(kgUnder) + ' kg under goal' : '⚠️ ' + fmt(-kgUnder) + ' kg over goal') + '</span></div>'
+        + '<div class="stat-row"><span class="stat-label">Last change</span><span class="stat-value ' + chCls + '">' + chStr + '</span></div>'
+        + '<div class="stat-row"><span class="stat-label">Maintaining since</span><span class="stat-value gold">' + since + '</span></div>'
+        + streakBadge + '</div>';
     }
-  });
-  return best;
+  }
+
+  document.getElementById('phase1-cards').innerHTML = p1.map(cardHtml).join('') || '<p style="color:var(--text-muted);font-size:.88rem">No participants in Phase 1.</p>';
+  document.getElementById('phase2-cards').innerHTML = p2.map(cardHtml).join('');
 }
 
-// Render podium
-function renderPodium(participants, dates) {
-  const medals = ['🥇', '🥈', '🥉'];
-  const colors = ['rank-1', 'rank-2', 'rank-3'];
-  if (dates.length < 1) { document.getElementById('podium').innerHTML = '<p style="color:var(--text-muted)">No data yet.</p>'; return; }
-  const lastDate = dates[dates.length - 1];
-  const prevDate = dates.length >= 2 ? dates[dates.length - 2] : null;
+// ── Render: Score breakdown ──────────────────────────────────────────
+function renderScoreBreakdown(scored) {
+  var typeInfo = {
+    loss:     { cls: 'ev-loss',     lbl: 'Phase 1 Loss'    },
+    maintain: { cls: 'ev-maintain', lbl: 'Phase 2 Maintain'},
+    goal:     { cls: 'ev-goal',     lbl: 'Goal Bonus 🎉'   },
+    streak:   { cls: 'ev-streak',   lbl: 'Streak Bonus'    },
+    win:      { cls: 'ev-win',      lbl: 'Monthly Win'     },
+  };
 
-  // Rank by: progress % descending
-  const ranked = [...participants].sort((a, b) => {
-    const pa = progressPct(a.startWeight, a.goalWeight, lastEntry(a)?.weight ?? a.startWeight);
-    const pb = progressPct(b.startWeight, b.goalWeight, lastEntry(b)?.weight ?? b.startWeight);
-    return pb - pa;
-  });
+  document.getElementById('score-bd-container').innerHTML = scored
+    .slice().sort(function(a,b){ return b.sd.total - a.sd.total; })
+    .map(function(p) {
+      var rows = p.sd.events.length
+        ? p.sd.events.map(function(ev) {
+            var info   = typeInfo[ev.type] || { cls: 'ev-loss', lbl: ev.type };
+            var ptsStr = ev.pts > 0 ? '+' + (Math.round(ev.pts * 10) / 10) : '—';
+            return '<tr>'
+              + '<td>' + shortDate(ev.date) + '</td>'
+              + '<td><span class="ev-type ' + info.cls + '">' + info.lbl + '</span></td>'
+              + '<td style="color:' + (ev.pts > 0 ? '#34d399' : 'var(--text-muted)') + '">' + ptsStr + '</td>'
+              + '<td style="color:var(--text-muted);font-size:.8rem">' + ev.note + '</td>'
+              + '</tr>';
+          }).join('') + '<tr class="total-row"><td colspan="2">Total</td><td>' + Math.round(p.sd.total) + ' pts</td><td></td></tr>'
+        : '<tr><td colspan="4" style="color:var(--text-muted);padding:.75rem 0">No scoring events yet – add a second weigh-in via Dev Console.</td></tr>';
 
-  const html = ranked.map((p, i) => {
-    const cur = lastEntry(p);
-    const prv = prevDate ? weightOn(p, prevDate) : null;
-    const drop = (cur && prv) ? (prv - cur.weight) : null;
-    const pct = progressPct(p.startWeight, p.goalWeight, cur?.weight ?? p.startWeight);
-    const dropStr = drop !== null
-      ? (drop > 0 ? `<span class="p-delta good">▼ ${fmt(drop)} kg this month</span>`
-         : drop < 0 ? `<span class="p-delta negative">▲ ${fmt(Math.abs(drop))} kg this month</span>`
-         : `<span class="p-delta neutral">— No change</span>`)
-      : `<span class="p-delta neutral">— First entry</span>`;
-    return `
-      <div class="podium-card ${colors[i]}" style="--accent:${p.color}">
-        <div class="medal">${medals[i]}</div>
-        <div class="p-name" style="color:${p.color}">${p.name}</div>
-        ${dropStr}
-        <div class="p-sub">${fmt(pct)}% to goal · ${cur ? cur.weight + ' kg' : '–'}</div>
-      </div>`;
-  }).join('');
-  document.getElementById('podium').innerHTML = html;
+      return '<details class="score-bd">'
+        + '<summary>'
+        +   '<span style="color:' + p.color + ';font-weight:800">' + p.name + '</span>'
+        +   '<span style="color:var(--text-muted);font-size:.78rem;margin-left:.4rem">'
+        +     (p.sd.phase === 2 ? '🛡️ Phase 2' : '🏃 Phase 1') + ' · streak ' + p.sd.streak
+        +   '</span>'
+        +   '<span style="margin-left:auto;color:var(--gold);font-weight:800;padding-right:.4rem">' + Math.round(p.sd.total) + ' pts</span>'
+        +   '<span class="bd-toggle">▼</span>'
+        + '</summary>'
+        + '<div class="bd-inner"><table>'
+        +   '<thead><tr><th>Month</th><th>Type</th><th>Points</th><th>Notes</th></tr></thead>'
+        +   '<tbody>' + rows + '</tbody>'
+        + '</table></div>'
+        + '</details>';
+    }).join('');
 }
 
-// Render participant cards
-function renderCards(participants, dates) {
-  const html = participants.map(p => {
-    const cur = lastEntry(p);
-    const prv = prevEntry(p);
-    const curW = cur ? cur.weight : p.startWeight;
-    const pct = progressPct(p.startWeight, p.goalWeight, curW);
-    const remaining = curW - p.goalWeight;
-    const change = (cur && prv) ? (prv.weight - cur.weight) : 0;
-    const changeStr = prv ? (change > 0 ? `▼ ${fmt(change)} kg` : change < 0 ? `▲ ${fmt(Math.abs(change))} kg` : '—') : '—';
-    const changeClass = change > 0 ? 'positive' : change < 0 ? 'negative' : '';
-
-    return `
-      <div class="p-card" style="--accent:${p.color}">
-        <div class="p-card-header">
-          <div class="p-card-name" style="color:${p.color}">${p.name}</div>
-          <div class="p-card-badge">${fmt(pct)}% done</div>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Current Weight</span>
-          <span class="stat-value">${fmt(curW)} kg</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Goal</span>
-          <span class="stat-value">${p.goalWeight} kg</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Still to lose</span>
-          <span class="stat-value ${remaining > 0 ? '' : 'positive'}">${remaining > 0 ? fmt(remaining) + ' kg' : '🎉 Goal reached!'}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Change (last month)</span>
-          <span class="stat-value ${changeClass}">${changeStr}</span>
-        </div>
-        <div class="prog-track">
-          <div class="prog-fill" style="width:${pct}%; background:${p.color}"></div>
-        </div>
-        <div class="prog-labels">
-          <span>${p.startWeight} kg</span>
-          <span>🏁 ${p.goalWeight} kg</span>
-        </div>
-        <div class="prog-pct" style="color:${p.color}">${fmt(pct, 0)}% complete</div>
-      </div>`;
-  }).join('');
-  document.getElementById('cards').innerHTML = html;
-}
-
-// Render chart
+// ── Render: Chart ────────────────────────────────────────────────────
 function renderChart(participants, dates) {
-  const ctx = document.getElementById('weightChart').getContext('2d');
-  const labels = dates.map(d => {
-    const dt = new Date(d + 'T00:00:00');
-    return dt.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  if (_chart) { _chart.destroy(); _chart = null; }
+  var ctx    = document.getElementById('weightChart').getContext('2d');
+  var labels = dates.map(function(d) {
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
   });
 
-  const datasets = participants.map(p => ({
-    label: p.name,
-    data: dates.map(d => weightOn(p, d)),
-    borderColor: p.color,
-    backgroundColor: p.color + '22',
-    borderWidth: 2.5,
-    pointRadius: 5,
-    pointHoverRadius: 7,
-    tension: 0.3,
-    fill: false,
-    spanGaps: true,
-  }));
-
-  // Goal lines as dashed datasets
-  participants.forEach(p => {
+  var datasets = [];
+  participants.forEach(function(p) {
+    datasets.push({
+      label: p.name,
+      data: dates.map(function(d) { return weightOn(p, d); }),
+      borderColor: p.color, backgroundColor: p.color + '22',
+      borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
+      tension: 0.3, fill: false, spanGaps: true,
+    });
     datasets.push({
       label: p.name + ' goal',
-      data: dates.map(() => p.goalWeight),
-      borderColor: p.color,
-      borderDash: [5, 5],
-      borderWidth: 1.5,
-      pointRadius: 0,
-      fill: false,
-      spanGaps: true,
+      data: dates.map(function() { return p.goalWeight; }),
+      borderColor: p.color, borderDash: [5, 5],
+      borderWidth: 1.5, pointRadius: 0, fill: false, spanGaps: true,
     });
   });
 
-  new Chart(ctx, {
+  _chart = new Chart(ctx, {
     type: 'line',
-    data: { labels, datasets },
+    data: { labels: labels, datasets: datasets },
     options: {
       responsive: true,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: {
-          labels: {
-            color: '#7b7b9a',
-            filter: item => !item.text.includes('goal'),
-            usePointStyle: true,
-          }
-        },
-        tooltip: {
-          backgroundColor: '#1a1a24',
-          borderColor: '#2e2e40',
-          borderWidth: 1,
-          titleColor: '#e2e2f0',
-          bodyColor: '#7b7b9a',
-        }
+        legend: { labels: { color: '#7b7b9a', filter: function(item) { return !item.text.includes(' goal'); }, usePointStyle: true } },
+        tooltip: { backgroundColor: '#1a1a24', borderColor: '#2e2e40', borderWidth: 1, titleColor: '#e2e2f0', bodyColor: '#7b7b9a' },
       },
       scales: {
-        x: {
-          ticks: { color: '#7b7b9a' },
-          grid: { color: '#1e1e2e' },
-        },
-        y: {
-          ticks: { color: '#7b7b9a', callback: v => v + ' kg' },
-          grid: { color: '#1e1e2e' },
-          reverse: false,
-        }
-      }
-    }
+        x: { ticks: { color: '#7b7b9a' }, grid: { color: '#1e1e2e' } },
+        y: { ticks: { color: '#7b7b9a', callback: function(v) { return v + ' kg'; } }, grid: { color: '#1e1e2e' } },
+      },
+    },
   });
 }
 
-// Render history table
-function renderHistory(participants, dates) {
-  participants.forEach((p, i) => {
-    document.getElementById('th-' + i).textContent = p.name;
-  });
+// ── Render: History ──────────────────────────────────────────────────
+function renderHistory(participants, dates, monthlyWinners) {
+  document.getElementById('hist-head').innerHTML = '<th>Date</th>'
+    + participants.map(function(p) { return '<th style="color:' + p.color + '">' + p.name + '</th>'; }).join('')
+    + '<th>Monthly Winner</th>';
 
-  const winner = monthlyWinner(participants, dates);
-  const prevDate = dates.length >= 2 ? dates[dates.length - 2] : null;
+  var rows = dates.slice().reverse().map(function(date) {
+    var idx      = dates.indexOf(date);
+    var prevDate = idx > 0 ? dates[idx - 1] : null;
 
-  const rows = [...dates].reverse().map(date => {
-    const cells = participants.map(p => {
-      const w = weightOn(p, date);
-      const prv = prevDate && date === dates[dates.length - 1] ? weightOn(p, prevDate) : null;
-      let tag = '';
-      if (prv !== null && w !== null) {
-        const drop = prv - w;
-        if (drop < 0) tag = `<span class="tag tag-gain">+${fmt(Math.abs(drop))}</span>`;
-      }
-      return `<td>${w !== null ? fmt(w) + ' kg' + tag : '–'}</td>`;
+    var cells = participants.map(function(p) {
+      var w   = weightOn(p, date);
+      var prv = prevDate ? weightOn(p, prevDate) : null;
+      var tags = '';
+      if (w !== null && prv !== null && prv - w < 0) tags += '<span class="tag tag-gain">+' + fmt(Math.abs(prv - w)) + '</span>';
+      if (w !== null && w <= p.goalWeight) tags += '<span class="tag tag-goal">Goal ✓</span>';
+      return '<td>' + (w !== null ? fmt(w) + ' kg' + tags : '–') + '</td>';
     }).join('');
 
-    const isLast = date === dates[dates.length - 1];
-    const winnerName = (isLast && winner) ? winner.name : '';
-    const winnerTag = winnerName ? `<span style="color:var(--gold)">🏆 ${winnerName}</span>` : '–';
+    var winIds  = monthlyWinners[date] || [];
+    var winHtml = winIds.length
+      ? winIds.map(function(id) {
+          var p = participants.find(function(x) { return x.id === id; });
+          return p ? '<span style="color:' + p.color + '">🏆 ' + p.name + '</span>' : '';
+        }).join(' ')
+      : '–';
 
-    const dt = new Date(date + 'T00:00:00');
-    const label = dt.toLocaleDateString('en-US', { month: 'long', year: 'numeric', day: 'numeric' });
-    const cls = isLast ? 'winner-row' : '';
-    return `<tr class="${cls}"><td>${label}</td>${cells}<td>${winnerTag}</td></tr>`;
+    return '<tr><td>' + longDate(date) + '</td>' + cells + '<td>' + winHtml + '</td></tr>';
   }).join('');
 
-  document.getElementById('hist-body').innerHTML = rows || '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem">No weigh-in data yet.</td></tr>';
+  document.getElementById('hist-body').innerHTML = rows
+    || '<tr><td colspan="' + (participants.length + 2) + '" style="color:var(--text-muted);padding:1.5rem">No weigh-in data yet.</td></tr>';
 }
 
-// Last updated
 function setLastUpdated(participants) {
-  const dates = participants.flatMap(p => p.entries.map(e => e.date));
-  if (!dates.length) return;
-  const latest = dates.sort().at(-1);
-  const dt = new Date(latest + 'T00:00:00');
-  document.getElementById('last-updated').textContent = dt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  var all = participants.reduce(function(acc, p) { return acc.concat(p.entries.map(function(e) { return e.date; })); }, []).sort();
+  if (!all.length) return;
+  document.getElementById('last-updated').textContent = longDate(all[all.length - 1]);
 }
 
-// ── Main ────────────────────────────────────────────────────────────
-(async () => {
-  const data = await loadData();
-  const { participants, deadline } = data;
+// ── Master re-render ─────────────────────────────────────────────────
+function rerender() {
+  var dates  = allDates(_data.participants);
+  var result = computeScores(_data);
+  renderLeaderboard(result.scored);
+  renderPhaseCards(result.scored);
+  renderScoreBreakdown(result.scored);
+  if (dates.length > 0) renderChart(_data.participants, dates);
+  renderHistory(_data.participants, dates, result.monthlyWinners);
+  setLastUpdated(_data.participants);
+}
 
-  startCountdown(deadline);
+// ── Dev Console ──────────────────────────────────────────────────────
+function devToggle() { document.getElementById('dev-console').classList.toggle('open'); }
 
-  const dates = allDates(participants);
+function dcLog(msg, isErr) {
+  var el = document.getElementById('dc-log');
+  el.textContent = msg;
+  el.className   = 'dev-log' + (isErr ? ' err' : '');
+}
 
-  renderPodium(participants, dates);
-  renderCards(participants, dates);
-  if (dates.length > 0) renderChart(participants, dates);
-  renderHistory(participants, dates);
-  setLastUpdated(participants);
+function dcInject() {
+  var pid    = document.getElementById('dc-participant').value;
+  var month  = document.getElementById('dc-date').value;
+  var weight = parseFloat(document.getElementById('dc-weight').value);
+
+  if (!pid || !month || isNaN(weight) || weight <= 0) { dcLog('⚠ Fill in all fields correctly.', true); return; }
+  if (!/^\d{4}-\d{2}$/.test(month)) { dcLog('⚠ Invalid date format.', true); return; }
+
+  var date = month + '-01';
+  var p    = _data.participants.find(function(x) { return x.id === pid; });
+  if (!p) { dcLog('⚠ Participant not found.', true); return; }
+
+  var idx = p.entries.findIndex(function(e) { return e.date === date; });
+  if (idx >= 0) {
+    p.entries[idx].weight = weight;
+    dcLog('✓ Updated ' + p.name + ' on ' + shortDate(date) + ': ' + weight + ' kg');
+  } else {
+    p.entries.push({ date: date, weight: weight });
+    p.entries.sort(function(a, b) { return a.date.localeCompare(b.date); });
+    dcLog('✓ Added ' + p.name + ' on ' + shortDate(date) + ': ' + weight + ' kg');
+  }
+  rerender();
+}
+
+function dcExport() {
+  var blob = new Blob([JSON.stringify(_data, null, 2)], { type: 'application/json' });
+  var a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'data.json';
+  a.click();
+  dcLog('✓ Exported data.json');
+}
+
+function dcReset() {
+  _data = JSON.parse(JSON.stringify(_original));
+  rerender();
+  dcLog('✓ Reset to original data.');
+}
+
+function initDevConsole(participants) {
+  document.getElementById('dc-participant').innerHTML =
+    participants.map(function(p) { return '<option value="' + p.id + '">' + p.name + '</option>'; }).join('');
+  var d = new Date();
+  d.setMonth(d.getMonth() + 1);
+  document.getElementById('dc-date').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+// ── Bootstrap ────────────────────────────────────────────────────────
+(function() {
+  fetch('data.json?v=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      _original = data;
+      _data     = JSON.parse(JSON.stringify(data));
+      startCountdown(_data.deadline);
+      initDevConsole(_data.participants);
+      rerender();
+    });
 })();
 </script>
 </body>
