@@ -165,7 +165,7 @@
     .race-lane-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
     .race-animal-name { font-size: 1.05rem; font-weight: 800; }
     .race-lane-stats  { font-size: .78rem; color: var(--text-muted); text-align: right; line-height: 1.55; }
-    .race-track-outer { position: relative; height: 90px; background: #060610; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+    .race-track-outer { position: relative; height: 120px; background: #060610; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
     .race-track-progress { height: 100%; transition: width 1.2s cubic-bezier(.34,1.56,.64,1); }
     .race-track-grid { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), #ffffff07 calc(10% - 1px), #ffffff07 10%); pointer-events: none; }
     .racer-pos  { position: absolute; top: 0; bottom: 0; display: flex; align-items: flex-end; padding-bottom: 3px; transition: left 1.2s cubic-bezier(.34,1.56,.64,1); }
@@ -173,7 +173,7 @@
     .racer-anim.hold { animation: raceHold 2s ease-in-out infinite alternate; }
     @keyframes raceRun  { from { transform: translateY(0);    } to { transform: translateY(-9px); } }
     @keyframes raceHold { from { transform: translateY(-5px); } to { transform: translateY(5px);  } }
-    .racer-sprite { width: 88px; height: 70px; background-image: url('animals.png'); background-size: 300% 300%; background-repeat: no-repeat; image-rendering: crisp-edges; flex-shrink: 0; }
+    .racer-sprite { width: 130px; height: 104px; background-image: url('animals.png'); background-size: 300% 300%; background-repeat: no-repeat; background-color: transparent; image-rendering: auto; flex-shrink: 0; transform: scaleX(-1); filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen; }
     .race-finish-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 2rem; pointer-events: none; }
     .race-lane-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: .7rem; font-size: .78rem; flex-wrap: wrap; gap: .3rem; }
     .race-pct-label  { font-weight: 800; }
@@ -809,7 +809,7 @@ function renderRace(scored) {
         + '<div class="race-track-outer">'  
         +   '<div class="race-track-progress" style="width:' + pct + '%;background:' + p.color + '25"></div>'  
         +   '<div class="race-track-grid"></div>'  
-        +   '<div class="racer-pos" style="left:calc(' + trackPos + '% - 44px)">'  
+        +   '<div class="racer-pos" style="left:calc(' + trackPos + '% - 65px)">'  
         +     '<div class="racer-anim' + (isP2 ? ' hold' : '') + '">'  
         +       '<div class="racer-sprite" style="background-position:' + bpx + ' ' + bpy + '"></div>'  
         +     '</div>'  
