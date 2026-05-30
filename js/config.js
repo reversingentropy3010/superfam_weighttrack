@@ -19,6 +19,16 @@ var RACERS = {
   CHC: { row: 2 },  // dragon
 };
 
+// animals_finished.png: 1536×1024 — chicken top-left, horse top-right, dragon bottom
+// Scale = 160/512 = 0.3125 → rendered size 480×320px (background-size: 480px 320px)
+// Chicken (row 0): top-left  → 0px 0px
+// Horse   (row 1): top-right → x=768*0.3125=240px → -240px 0px
+// Dragon  (row 2): bottom, full-width → y=512*0.3125=160px, centred → -140px -160px
+var FINISHED_SPRITE = {
+  bgSize: '480px 320px',
+  positions: ['0px 0px', '-240px 0px', '-140px -160px'],
+};
+
 // Per-animal quotes: 4 stages (0–33% / 33–66% / 66–100% / at goal)
 var ANIMAL_QUOTES = [
   // Chicken (SC, row 0)
