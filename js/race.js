@@ -31,11 +31,7 @@ function renderRace(scored) {
       var kgLost  = p.startWeight - curW;
       var trackPos = isP2 ? 80 : Math.min(75, 17 + pct * 0.58);
 
-      var spriteStyle = isP2
-        ? 'background-image:url(\'animals_finished.png\');background-size:' + FINISHED_SPRITE.bgSize + ';background-position:' + FINISHED_SPRITE.positions[r.row]
-        : 'background-position:' + bpx + ' ' + bpy;
-
-      return '<div class="race-lane" style="--lane-color:' + p.color + '">'
+      return '<div class="race-lane' + (isP2 ? ' is-p2' : '') + '" style="--lane-color:' + p.color + '">'  
         + '<div class="race-lane-top">'
         +   '<div class="race-animal-name" style="color:' + p.color + '">' + p.name + '</div>'
         +   '<div class="race-lane-stats">'
@@ -48,11 +44,15 @@ function renderRace(scored) {
         + '<div class="race-track-outer">'
         +   '<div class="race-track-progress" style="width:' + pct + '%;background:' + p.color + '25"></div>'
         +   '<div class="race-track-grid"></div>'
-        +   '<div class="racer-pos" style="left:calc(' + trackPos + '% - 100px)">'
-        +     '<div class="racer-anim' + (isP2 ? ' hold' : '') + '">'
-        +       '<div class="racer-sprite" style="' + spriteStyle + '"></div>'
-        +     '</div>'
-        +   '</div>'
+        +   (isP2
+              ? '<div class="racer-pos racer-pos--finished">'
+                + '<div class="racer-anim hold">'
+                + '<img class="racer-finished" src="' + FINISHED_IMGS[r.row] + '" alt="">'
+                + '</div></div>'
+              : '<div class="racer-pos" style="left:calc(' + trackPos + '% - 100px)">'
+                + '<div class="racer-anim">'
+                + '<div class="racer-sprite" style="background-position:' + bpx + ' ' + bpy + '"></div>'
+                + '</div></div>')
         +   '<div class="race-finish-icon' + (isP2 ? ' done">✅' : '">') + '</div>'
         + '</div>'
         + '<div class="race-lane-bottom">'
