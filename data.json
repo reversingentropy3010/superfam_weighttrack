@@ -4,31 +4,31 @@
     {
       "id": "SC",
       "name": "SC",
-      "startWeight": 90,
-      "goalWeight": 75,
+      "startWeight": 90.2,
+      "goalWeight": 77,
       "color": "#6366f1",
       "entries": [
-        { "date": "2026-05-01", "weight": 90 }
+        { "date": "2026-06-01", "weight": 90.2 }
       ]
     },
     {
       "id": "JC",
       "name": "JC",
-      "startWeight": 95,
+      "startWeight": 94.7,
       "goalWeight": 80,
       "color": "#ec4899",
       "entries": [
-        { "date": "2026-05-01", "weight": 95 }
+        { "date": "2026-06-01", "weight": 94.7 }
       ]
     },
     {
       "id": "CHC",
       "name": "CHC",
-      "startWeight": 95,
+      "startWeight": 90.9,
       "goalWeight": 85,
       "color": "#10b981",
       "entries": [
-        { "date": "2026-05-01", "weight": 95 }
+        { "date": "2026-06-01", "weight": 90.9 }
       ]
     }
   ]
