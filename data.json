@@ -8,7 +8,8 @@
       "goalWeight": 77,
       "color": "#6366f1",
       "entries": [
-        { "date": "2026-06-01", "weight": 90.2 }
+        { "date": "2026-06-01", "weight": 90.2 },
+        { "date": "2026-07-01", "weight": 91.0 }
       ]
     },
     {
@@ -18,7 +19,8 @@
       "goalWeight": 80,
       "color": "#ec4899",
       "entries": [
-        { "date": "2026-06-01", "weight": 94.7 }
+        { "date": "2026-06-01", "weight": 94.7 },
+        { "date": "2026-07-01", "weight": 92.5 }
       ]
     },
     {
@@ -28,7 +30,8 @@
       "goalWeight": 85,
       "color": "#10b981",
       "entries": [
-        { "date": "2026-06-01", "weight": 90.9 }
+        { "date": "2026-06-01", "weight": 90.9 },
+        { "date": "2026-07-01", "weight": 91.5 }
       ]
     }
   ]
